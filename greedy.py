@@ -1,0 +1,27 @@
+import numpy as np
+from seating import Seating
+
+
+def read_instance(filename="instances/instance.txt"):
+    with open(filename, "r") as f:
+        lines = f.readlines()
+        h = int(lines[0].strip())
+        v = int(lines[1].strip())
+        people = {}
+        problem = np.zeros((h, v))
+        for amt, i in enumerate(lines[-1].split()):
+            people[amt] = int(i)
+        for i, line in enumerate(lines[2 : v - 1]):
+            problem[i, :] = np.array([bool(int(z)) for z in line.strip()])
+
+    print("Input")
+    print(problem)
+    return problem, people, h, v
+
+
+a = Seating(*read_instance())
+seats, no_seat = a.greedy()
+print()
+print("Output (2=person seated)")
+print(seats)
+print("Not seated", no_seat)
