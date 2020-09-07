@@ -1,4 +1,6 @@
+import argparse
 import numpy as np
+
 from seating import Seating
 
 
@@ -19,9 +21,19 @@ def read_instance(filename="instances/instance.txt"):
     return problem, people, h, v
 
 
-a = Seating(*read_instance())
-seats, no_seat = a.greedy()
-print()
-print("Output (2=person seated)")
-print(seats)
-print("Not seated", no_seat)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--filename",
+        type=str,
+        default="instances/instance.txt",
+        help="Filename with instance",
+    )
+    args = parser.parse_args()
+
+    a = Seating(*read_instance(args.filename))
+    seats, no_seat = a.greedy()
+    print()
+    print("Output (2=person seated)")
+    print(seats)
+    print("Not seated", no_seat)
