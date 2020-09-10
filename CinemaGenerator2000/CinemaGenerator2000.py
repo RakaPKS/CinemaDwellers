@@ -70,8 +70,6 @@ def count_seats(cinema):
     return n_of_people
 
 def generate_groups_offline(cinema):
-    ## first calculate total number of seats available
-    ## do we always generate group sizes up to the max seats available
     group_sizes = np.full(8, 0)
     n_of_people = 0;
     n_of_seats = perc_seats_occupied * count_seats(cinema)
