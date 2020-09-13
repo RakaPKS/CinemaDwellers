@@ -30,7 +30,7 @@ class Seating:
 
                 # Get possible legal start positions for the group
                 pos = self.find_legal_start_position(group_size, self.available_seats)
-
+                # print(pos)
                 # If there is at least one place these guys can sit
                 if len(pos) > 0:
                     # Find the best position with a loop (not very fast)
@@ -38,18 +38,16 @@ class Seating:
                     best_amt = np.size(self.available_seats)
 
                     amts = np.zeros(len(pos)) - 1
-                    a_s_s = np.zeros((len(pos), self.h + 4, self.v + 4)) - 1
                     poses = [-1] * len(pos)
 
                     for index, possible in enumerate(pos):
-                        a_s, amt = self.update_seats(
+                        _, amt = self.update_seats(
                             possible, group_size, self.available_seats
                         )
                         amts[index] = amt
 
                         if amt <= best_amt:
                             best_amt = amt
-                            a_s_s[index] = a_s
                             poses[index] = possible
 
                     # Choose one of the best solutions
@@ -58,7 +56,9 @@ class Seating:
                     x, y = poses[choice]
 
                     # Update the available seats (add zeros)
-                    self.available_seats = a_s_s[choice].copy()
+                    self.available_seats, _ = self.update_seats(
+                        poses[choice], group_size, self.available_seats
+                    )
 
                     # Update where people are sitting
                     seats[x, y : y + group_size] = np.zeros(group_size) + 2
@@ -66,7 +66,6 @@ class Seating:
                 # Else
                 else:
                     no_seat += group_size
-                    # print("No place for you")
 
         # Remove padding
         return seats[2:-2, 2:-2], no_seat
