@@ -22,7 +22,7 @@ class Seating:
         no_seat = 0
         seats = self.available_seats.copy()
 
-        # Go through group sizes from big
+        # Go through group sizes from big to small
         for group_size in range(8, 0, -1):
 
             # The amount of groups with this size
@@ -30,11 +30,11 @@ class Seating:
 
                 # Get possible legal start positions for the group
                 pos = self.find_legal_start_position(group_size, self.available_seats)
-                # print(pos)
+
                 # If there is at least one place these guys can sit
                 if len(pos) > 0:
-                    # Find the best position with a loop (not very fast)
-                    # (minimal amount of seats occupied after seating the group on that position)
+                    # Find the best position with a loop
+                    # best = (minimal amount of seats occupied after seating the group on that position)
                     best_amt = np.size(self.available_seats)
 
                     amts = np.zeros(len(pos)) - 1
@@ -62,8 +62,7 @@ class Seating:
 
                     # Update where people are sitting
                     seats[x, y : y + group_size] = np.zeros(group_size) + 2
-
-                # Else
+                # No places this group can sit, time to move on.
                 else:
                     no_seat += group_size
 

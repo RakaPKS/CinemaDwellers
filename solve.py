@@ -27,7 +27,7 @@ if __name__ == "__main__":
         "--filename",
         type=str,
         default="instances/instance.txt",
-        help="Filename with instance",
+        help="Filename with offline instance",
     )
     args = parser.parse_args()
 
