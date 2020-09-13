@@ -13,7 +13,8 @@ def read_instance(filename="instances/instance.txt"):
         problem = np.zeros((h, v))
         for amt, i in enumerate(lines[-1].split()):
             people[amt] = int(i)
-        for i, line in enumerate(lines[2 : v - 1]):
+        for i, line in enumerate(lines[2:-1]):
+            # print(line.strip())
             problem[i, :] = np.array([bool(int(z)) for z in line.strip()])
 
     print("Input")
@@ -34,6 +35,11 @@ if __name__ == "__main__":
     a = Seating(*read_instance(args.filename))
     seats, no_seat = a.greedy()
     print()
-    print("Output (2=person seated)")
+    print("Output (greedy) (2=person seated)")
     print(seats)
     print("Not seated", no_seat)
+    if no_seat > 0:
+        print()
+        print("Output (opt) (2=person seated)")
+        a = Seating(*read_instance(args.filename))
+        a.dfs()
