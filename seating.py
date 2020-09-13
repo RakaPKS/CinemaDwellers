@@ -69,8 +69,8 @@ class Seating:
         best_seats = None
         visited = set()
 
-        while len(stack) > 0:
-            if np.random.rand() > 0.9995:
+        while len(stack) > 0 and len(stack) < 1000:
+            if np.random.rand() > 0.9:
                 print("Stack size", len(stack), self.totalpeople - best)
             (current, amt_seated) = stack.pop()
             h = hashed(current.seated)
@@ -89,8 +89,7 @@ class Seating:
                     current_group_size, current.available_seats
                 )
 
-                # TODO: Go over the positions in a greedy order
-                # TODO: Or possibly use a priority queue with available seats as a thing
+                # TODO: Or possibly use a priority queue?
                 # Right now: adding all possibilities at once.
                 if len(pos) > 0:
                     opts = []
@@ -115,7 +114,7 @@ class Seating:
                         ):
                             opts.append((free, new_seated, a_s, seated_amount))
 
-                    for opt in sorted(opts, key=lambda x: x[0] + x[3], reverse=True):
+                    for opt in sorted(opts, key=lambda x: x[0] + x[3], reverse=True)[:80]:
                         _, new_seated, a_s, seated_amount = opt
                         stack.append(
                             (
@@ -130,9 +129,11 @@ class Seating:
                     # This group could not be seated, try the next group
                     # This is necessary if there are groups too large for the cinema
                     current.group_index += 1
-
-        print(best_seats.seated[2:-2, 2:-2])
-        print("Not seated", np.sum(self.groups) - best)
+        if best_seats is None: 
+            print("Stack became 2 Big")
+        else:
+            print(best_seats.seated[2:-2, 2:-2])
+            print("Not seated", np.sum(self.groups) - best)
 
     def greedy(self):
         """

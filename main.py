@@ -30,6 +30,10 @@ if __name__ == "__main__":
         default="instances/instance.txt",
         help="Filename with instance",
     )
+    parser.add_argument(
+        "--search", type=str, 
+        default="n", help="Apply search? [y|n]"
+    )
     args = parser.parse_args()
 
     a = Seating(*read_instance(args.filename))
@@ -37,8 +41,8 @@ if __name__ == "__main__":
     print()
     print("Output (greedy) (2=person seated)")
     print(seats)
-    print("Not seated", no_seat)
-    if no_seat > 0:
+    print("Not seated", no_seat, "out of", a.totalpeople)
+    if no_seat > 0 and args.search =='y':
         print()
         print("Output (opt) (2=person seated)")
         a = Seating(*read_instance(args.filename))
