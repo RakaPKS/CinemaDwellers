@@ -11,9 +11,10 @@ def read_instance(filename="instances/instance.txt"):
         v = int(lines[1].strip())
         people = {}
         problem = np.zeros((h, v))
+
         for amt, i in enumerate(lines[-1].split()):
             people[amt] = int(i)
-        for i, line in enumerate(lines[2 : v - 1]):
+        for i, line in enumerate(lines[2 : -1]):
             problem[i, :] = np.array([bool(int(z)) for z in line.strip()])
 
     print("Input")
