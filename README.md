@@ -10,7 +10,7 @@ Also: probably use python3.8, the nicest one :)
 
 Run 
 
-```greedy.py [--filename instances/myinstance.txt ]```
+```main.py [--filename instances/myinstance.txt ]```
 
 When no filename is provided, default instance from blackboard is used.
 
