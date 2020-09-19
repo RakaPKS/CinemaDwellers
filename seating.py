@@ -1,6 +1,7 @@
 import numpy as np
 from collections import deque
 import heapq
+from tqdm import tqdm
 
 
 class Seating:
@@ -71,8 +72,8 @@ class Seating:
         visited = set()
 
         while len(stack) > 0 and len(stack) < 1000:
-            if np.random.rand() > 0.999:
-                print("Stack size", len(stack), self.totalpeople - best)
+            # if np.random.rand() > 0.999:
+            #    print("Stack size", len(stack), self.totalpeople - best)
             (current, amt_seated) = stack.pop()
             h = hashed(current.seated)
             visited.add(h)
@@ -114,15 +115,14 @@ class Seating:
                         if hashed(new_seated) not in visited and best < (
                             seated_amount + free
                         ):
-                            if seated_amount == self.totalpeople: 
+                            if seated_amount == self.totalpeople:
                                 print("Everyone seated, breaking")
                                 print(best_seats.seated[2:-2, 2:-2])
                                 print("Not seated", np.sum(self.groups) - best)
-                                return 
+                                return
                             opts.append((free, new_seated, a_s, seated_amount))
-                            
 
-                    for opt in sorted(opts, key=lambda x: x[0], reverse=True):
+                    for opt in sorted(opts, key=lambda x: x[0], reverse=False):
                         _, new_seated, a_s, seated_amount = opt
                         stack.append(
                             (
@@ -137,7 +137,7 @@ class Seating:
                     # This group could not be seated, try the next group
                     # This is necessary if there are groups too large for the cinema
                     current.group_index += 1
-        if best_seats is None: 
+        if best_seats is None:
             print("Stack became 2 Big")
         else:
             print(best_seats.seated[2:-2, 2:-2])

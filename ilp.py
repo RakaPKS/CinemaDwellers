@@ -6,6 +6,7 @@ from seating import Seating
 import math
 import argparse
 
+
 def make_ILP(filename="instances/mini.txt"):
     # Prepare our problem instance
     problem, people, rows, columns = read_instance(filename)
@@ -44,7 +45,7 @@ def make_ILP(filename="instances/mini.txt"):
     ver1 = model.addVars(group_amount, group_amount, vtype=GRB.BINARY, name="ver1")
     ver2 = model.addVars(group_amount, group_amount, vtype=GRB.BINARY, name="ver2")
 
-    # Store difference in both directions so we can apply diagonal formula |x1 + s1 - x2| == |y1 - y2| 
+    # Store difference in both directions so we can apply diagonal formula |x1 + s1 - x2| == |y1 - y2|
     # Difference can be negative, -infinity necessary as lower bound
     diff_hor = model.addVars(
         group_amount, group_amount, lb=-GRB.INFINITY, vtype=GRB.INTEGER, name="diff_hor"
@@ -71,7 +72,7 @@ def make_ILP(filename="instances/mini.txt"):
         group_amount, group_amount, vtype=GRB.INTEGER, name="diagguy3"
     )
 
-    # Stores whether the absolute differences are the same 
+    # Stores whether the absolute differences are the same
     diag1 = model.addVars(group_amount, group_amount, vtype=GRB.BINARY, name="diag1")
     diag2 = model.addVars(group_amount, group_amount, vtype=GRB.BINARY, name="diag2")
 
@@ -91,7 +92,7 @@ def make_ILP(filename="instances/mini.txt"):
     groupseatedx = model.addVars(group_amount, vtype=GRB.BINARY, name="groupseatedx")
     groupseatedy = model.addVars(group_amount, vtype=GRB.BINARY, name="groupseatedy")
 
-    # Reward[i] holds the value seated[i] 
+    # Reward[i] holds the value seated[i]
     # (0/1) * group_size
     reward = model.addVars(group_amount, vtype=GRB.INTEGER, name="reward")
 
@@ -169,15 +170,24 @@ def make_ILP(filename="instances/mini.txt"):
 
                 # Store all info for the inequality constraint
                 model.addGenConstrIndicator(
-                    notequal_1[i, j], 1, (col[i] + size[i]) - col[j], GRB.GREATER_EQUAL, 1
+                    notequal_1[i, j],
+                    1,
+                    (col[i] + size[i]) - col[j],
+                    GRB.GREATER_EQUAL,
+                    1,
                 )
                 model.addGenConstrIndicator(
-                    notequal_2[i, j], 1, col[j] - (col[i] + size[i]), GRB.GREATER_EQUAL, 1
+                    notequal_2[i, j],
+                    1,
+                    col[j] - (col[i] + size[i]),
+                    GRB.GREATER_EQUAL,
+                    1,
                 )
 
                 # Add the inequality constraint
-                model.addConstr(notequal_1[i, j] + notequal_2[i, j], GRB.GREATER_EQUAL, 1)
-
+                model.addConstr(
+                    notequal_1[i, j] + notequal_2[i, j], GRB.GREATER_EQUAL, 1
+                )
 
                 # Finally, see if one of these is true
                 model.addConstr(
@@ -199,12 +209,13 @@ def make_ILP(filename="instances/mini.txt"):
         print(
             "Position (", col_position, ", ", row_position, ") for group of size:", grp
         )
-        print('Group seated', groupseatedx[i].x, groupseatedy[i].x, groupseated[i].x)
+        print("Group seated", groupseatedx[i].x, groupseatedy[i].x, groupseated[i].x)
         if row_position >= 0 and col_position >= 0:
             solution[row_position, col_position : col_position + grp] = (
                 np.zeros(grp) + 2
             )
     print(solution)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -217,4 +228,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     make_ILP(args.filename)
-
