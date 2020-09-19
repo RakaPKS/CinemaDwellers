@@ -14,12 +14,8 @@ def read_instance(filename="instances/instance.txt"):
 
         for amt, i in enumerate(lines[-1].split()):
             people[amt] = int(i)
-<<<<<<< HEAD:solve.py
-        for i, line in enumerate(lines[2 : -1]):
-=======
         for i, line in enumerate(lines[2:-1]):
             # print(line.strip())
->>>>>>> branchbound:main.py
             problem[i, :] = np.array([bool(int(z)) for z in line.strip()])
 
     print("Input")
