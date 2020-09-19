@@ -14,7 +14,7 @@ class Seating:
             group_index: What is the index of the next group to be seated in self.groups?
         """
 
-        # Add padding so no out of range errors
+        # When first initialized: Add padding so no out of range errors
         # Don't pad already padded seats
         if seated is None:
             self.available_seats = np.pad(
@@ -37,6 +37,7 @@ class Seating:
             )
         )
         self.totalpeople = np.sum(self.groups)
+        self.maximumchairs = np.count_nonzero(self.available_seats == 1)
         if group_index is None:
             self.group_index = 0
         else:
@@ -70,7 +71,7 @@ class Seating:
         visited = set()
 
         while len(stack) > 0 and len(stack) < 1000:
-            if np.random.rand() > 0.9:
+            if np.random.rand() > 0.999:
                 print("Stack size", len(stack), self.totalpeople - best)
             (current, amt_seated) = stack.pop()
             h = hashed(current.seated)
@@ -109,12 +110,19 @@ class Seating:
                         free = np.count_nonzero(new_seated == 1)
 
                         # (Seating, Amount_Seated)
+                        # Only add if there are no better solutions found already
                         if hashed(new_seated) not in visited and best < (
                             seated_amount + free
                         ):
+                            if seated_amount == self.totalpeople: 
+                                print("Everyone seated, breaking")
+                                print(best_seats.seated[2:-2, 2:-2])
+                                print("Not seated", np.sum(self.groups) - best)
+                                return 
                             opts.append((free, new_seated, a_s, seated_amount))
+                            
 
-                    for opt in sorted(opts, key=lambda x: x[0] + x[3], reverse=True)[:80]:
+                    for opt in sorted(opts, key=lambda x: x[0], reverse=True):
                         _, new_seated, a_s, seated_amount = opt
                         stack.append(
                             (
