@@ -61,17 +61,12 @@ with open(filename, "r") as f:
     h = int(lines[0].strip())
     v = int(lines[1].strip())
     people = {}
-    problem = np.zeros((v, h))
+    problem = np.zeros((h, v))
     for amt, i in enumerate(lines[-1].split()):
         people[amt] = int(i)
-    ##for i, line in enumerate(lines[2 : v - 3]):
-        ###problem[i, :] = np.array([bool(int(z)) for z in line.strip()])
-    cinemaText = lines[2 : v - 3]
-    
-    for i in range(v):
-        for j in range(h):
-            problem[i][j] = int(cinemaText[j][i])
-
+    for i, line in enumerate(lines[2 : v - 3]):
+        problem[i, :] = np.array([bool(int(z)) for z in line.strip()])
+        
     blob = problem.copy()
     
     ###blob = placeGroup(blob, 0, 0, 4).copy()
