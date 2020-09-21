@@ -2,6 +2,10 @@ import unittest
 import numpy as np
 
 
+def count_seated(matrix):
+    return np.count_nonzero(matrix == 2)
+
+
 def check_legal(size1, size2, x1, x2, y1, y2):
     """Checks whether two group start positions are legal"""
     # Groups seated in the same row
@@ -22,6 +26,7 @@ def check_legal(size1, size2, x1, x2, y1, y2):
             return False
 
     # Only one row between the two groups
+    # Treat the same as "same row" case, except that they can be 1 seat apart instead of 2
     elif np.abs(y1 - y2) == 1:
         if x1 < x2:
             if x2 - (x1 + (size1 - 1)) <= 1:
@@ -34,6 +39,8 @@ def check_legal(size1, size2, x1, x2, y1, y2):
 
 
 class TestCheckLegal(unittest.TestCase):
+    """Checks for check_legal"""
+
     def test_horizontal(self):
         self.assertEqual(
             check_legal(2, 2, x1=0, x2=3, y1=0, y2=0), False, "Group 1 to left"
