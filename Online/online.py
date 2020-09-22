@@ -31,14 +31,6 @@ def doesGroupFit(cinema, x, y, groupSize):
     for i in range(groupSize):
         if x + i >= len(cinema) or cinema[x + i][y] != 1:
             return False
-    ###for i in range(-1, groupSize + 1):
-        ###for j in range(-1, 2):
-            ###if x + i < 0 or x + i >= len(cinema) or y + j < 0 or y + j >= len(cinema[0]) or cinema[x + i][y + j] != 1:
-                ###return False
-    ###if x - 2 < 0 or cinema[x - 2][y] != 1:
-        ###return False
-    ###if x + groupSize + 1 < len(cinema) and cinema[x + groupSize + 1][y] != 1:
-        ###return False
     return True
 
 def findBestPos(groupSize, cinema):
@@ -57,9 +49,17 @@ def printCinema(cinema):
     res = ""
     for j in range(len(cinema[0])):
         for i in range(len(cinema)):
-            res += str(cinema[i][j]) + " "
+            res += str(int(cinema[i][j])) + " "
         res += "\n"
     print(res)
+
+def countSeated(cinema):
+    res = 0
+    for i in range(len(cinema)):
+        for j in range(len(cinema[0])):
+            if cinema[i][j] == 2:
+                res += 1
+    return res
 
 filename="cinema_online.txt"
 with open(filename, "r") as f:
@@ -70,20 +70,18 @@ with open(filename, "r") as f:
     problem = np.zeros((v, h))
     for amt, i in enumerate(lines[-1].split()):
         people[amt] = int(i)
-    ###for i, line in enumerate(lines[2 : v - 3]):
-        ###problem[i, :] = np.array([bool(int(z)) for z in line.strip()])
-    
-    cinemaText = lines[2 : v - 3]
-
-    for i in range(v):
-        for j in range(h):
-            problem[i][j] = int(cinemaText[j][i])
-    
-    blob = problem.copy()
+    for i, line in enumerate(lines[2 : v - 3]):
+        problem[:, i] = np.array([bool(int(z)) for z in line.strip()])
     
     for i in range(len(people)):
-        (x, y) = findBestPos(people[i], blob)
+        (x, y) = findBestPos(people[i], problem)
         if (x, y) != (-1, -1):
-            blob = placeGroup(blob, x, y, people[i]).copy()
+            placeGroup(problem, x, y, people[i])
     
-    printCinema(blob)
+    printCinema(problem)
+
+    totalPeople = 0
+    for (i, amt) in people.items():
+        totalPeople += amt
+
+    print("Seated " + str(countSeated(problem))  + " people out of " + str(totalPeople) + " total people.")
