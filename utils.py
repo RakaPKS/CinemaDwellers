@@ -35,7 +35,8 @@ def check_legal(size1, size2, x1, x2, y1, y2):
             return (False, LegalError.vertical)
 
     # Only one row between the two groups
-    # Treat the same as "same row" case, except that they can be 1 seat apart instead of 2
+    # Treat the same as "same row" case, except that they can be 1 seat apart
+    # instead of 2
     elif np.abs(y1 - y2) == 1:
         if x1 < x2:
             if x2 - (x1 + (size1 - 1)) <= 1:
@@ -45,6 +46,27 @@ def check_legal(size1, size2, x1, x2, y1, y2):
                 return (False, LegalError.diagnol)
 
     return (True, LegalError.none)
+
+def get_invalid_seats(x1, y1, g1, g2, xdim, ydim):
+    result = []
+    g_size1 = (g1 - 1)
+    g_size2 = (g2 - 1)
+    last_seat = x1 + g_size1
+
+    for x2 in range(x1 - 2 - g_size2, x1 + g_size1 + 3):
+        # only add inbounds
+        if x2 >= 0 and x2 < xdim:
+            result.append((x2, y1))
+
+    for x2 in range(x1 - 2 - g_size2 + 1, x1 + g_size1 + 2):
+        if (x2 >= 0 and x2 < xdim and (y1 + 1) >= 0 and (y1 + 1) < ydim):
+            result.append((x2, y1 + 1))
+
+        if x2 >= 0 and x2 < xdim and (y1 - 1) >= 0:
+            result.append((x2, y1 - 1))
+
+    return result
+
 
 def verify_cinema(cinema, xlen, ylen):
     seated_groups = dict()
@@ -73,7 +95,7 @@ def verify_cinema(cinema, xlen, ylen):
             group_size = 0
             first_person = (-1,-1)
 
-    cinema_meets_corona_guidelines = True;
+    cinema_meets_corona_guidelines = True
 
     print("---- VERIFYING CINEMA ----")
     for (x1,y1), g1 in seated_groups.items():
@@ -99,24 +121,14 @@ class TestCheckLegal(unittest.TestCase):
     """Checks for check_legal"""
 
     def test_horizontal(self):
-        self.assertEqual(
-            check_legal(2, 2, x1=0, x2=3, y1=0, y2=0), False, "Group 1 to left"
-        )
-        self.assertEqual(
-            check_legal(2, 2, x1=3, x2=0, y1=0, y2=0), False, "Group 1 to right"
-        )
-        self.assertEqual(
-            check_legal(1, 1, x1=0, x2=2, y1=0, y2=0), False, "Group 1 to right"
-        )
-        self.assertEqual(
-            check_legal(1, 1, x1=0, x2=1, y1=0, y2=0), False, "Group 1 to right"
-        )
+        self.assertEqual(check_legal(2, 2, x1=0, x2=3, y1=0, y2=0), False, "Group 1 to left")
+        self.assertEqual(check_legal(2, 2, x1=3, x2=0, y1=0, y2=0), False, "Group 1 to right")
+        self.assertEqual(check_legal(1, 1, x1=0, x2=2, y1=0, y2=0), False, "Group 1 to right")
+        self.assertEqual(check_legal(1, 1, x1=0, x2=1, y1=0, y2=0), False, "Group 1 to right")
         self.assertEqual(check_legal(2, 1, x1=0, x2=3, y1=0, y2=0), False)
         self.assertEqual(check_legal(2, 1, x1=0, x2=4, y1=0, y2=0), True)
         self.assertEqual(check_legal(1, 2, x1=4, x2=0, y1=0, y2=0), True)
-        self.assertEqual(
-            check_legal(1, 2, x1=3, x2=0, y1=0, y2=0), False, "Group sizes"
-        )
+        self.assertEqual(check_legal(1, 2, x1=3, x2=0, y1=0, y2=0), False, "Group sizes")
         self.assertEqual(check_legal(1, 1, x1=0, x2=3, y1=0, y2=0), True)
         self.assertEqual(check_legal(1, 2, x1=0, x2=2, y1=0, y2=0), False)
 
@@ -137,4 +149,5 @@ class TestCheckLegal(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    # unittest.main()
+    print(invalid_seats(9, 0, 1, 2, 10, 6))
