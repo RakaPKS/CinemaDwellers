@@ -8,7 +8,7 @@ from gurobipy import GRB
 
 from solve import read_instance
 from seating import Seating
-from utils import check_legal, count_seated
+from utils import check_legal, count_seated, verify_cinema
 
 
 def make_and_solve_ILP(filename):
@@ -86,14 +86,68 @@ def make_and_solve_ILP(filename):
                 # For each combination of positions (x1,y1), (x2,y2)
                 # TODO: Loop only over possible positions for each group_size.
                 # This can for instance be done using find_legal_startpositions
+                #for x1 in range(xs):
+                #    for y1 in range(ys):
+                #        prev_is_legal = False
+                #        # Process left hand side first
+                #        for xl2 in range(x1, -1, -1):
+                #            # if the previous is legal, we do not need to go deeper
+                #            if (prev_is_legal):
+                #                break;
+
+                #            (is_legal, _) = check_legal(group_sizes[g1], group_sizes[g2], x1, xl2 - 1, y1, y1)
+
+                #            if not is_legal:
+                #                model.addConstr(seated[x1, y1, g1] + seated[xl2, y1, g2], GRB.LESS_EQUAL,1)
+
+                #            prev_is_legal = is_legal
+
+                #        # Process right hand side
+                #        prev_is_legal = False
+                #        for xr2 in range(x1,xs):
+                #            if (prev_is_legal):
+                #                break;
+
+                #            (is_legal, _) = check_legal(group_sizes[g1], group_sizes[g2], x1, xr2, y1, y1)
+
+                #            if not is_legal:
+                #                model.addConstr(seated[x1, y1, g1] + seated[xr2, y1, g2], GRB.LESS_EQUAL,1)
+
+                #            prev_is_legal = is_legal
+
+                #        # Process towards the screen
+                #        prev_is_legal = False
+                #        for yu2 in range(y1,0, -1):
+                #            if (prev_is_legal):
+                #                break;
+
+                #            (is_legal, _) = check_legal(group_sizes[g1], group_sizes[g2], x1, x1, y1, yu2 - 1)
+
+                #            if not is_legal:
+                #                model.addConstr(seated[x1, y1, g1] + seated[x1, yu2, g2], GRB.LESS_EQUAL,1)
+
+                #            prev_is_legal = is_legal
+                        
+                #        # Process away fron the screen
+                #        prev_is_legal = False
+                #        for yb2 in range(y1,ys):
+                #            if (prev_is_legal):
+                #                break;
+
+                #            (is_legal, _) = check_legal(group_sizes[g1], group_sizes[g2], x1, x1, y1, yb2)
+
+                #            if not is_legal:
+                #                model.addConstr(seated[x1, y1, g1] + seated[x1, yb2, g2], GRB.LESS_EQUAL,1)
+
+                #            prev_is_legal = is_legal
+
                 for x1 in range(xs):
                     for x2 in range(xs):
                         for y1 in range(ys):
                             for y2 in range(ys):
                                 # Check if this combination of positions is illegal, if so, add a constraint
-                                if not check_legal(
-                                    group_sizes[g1], group_sizes[g2], x1, x2, y1, y2
-                                ):
+                                (is_legal, _) = check_legal(group_sizes[g1], group_sizes[g2], x1, x1, y1, y2)
+                                if not is_legal:
                                     model.addConstr(
                                         seated[x1, y1, g1] + seated[x2, y2, g2],
                                         GRB.LESS_EQUAL,
@@ -130,6 +184,8 @@ def make_and_solve_ILP(filename):
     print("---")
     print(solution)
     print("Not seated", people_amount - count_seated(solution), "out of", people_amount)
+
+    verify_cinema(solution, xs, ys)
 
 
 if __name__ == "__main__":
