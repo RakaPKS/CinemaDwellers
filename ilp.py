@@ -8,7 +8,7 @@ from gurobipy import GRB
 
 from solve import read_instance
 from seating import Seating
-from utils import check_legal, count_seated
+from utils import check_legal, count_seated, find_legal_start_positions
 
 
 def make_and_solve_ILP(filename):
@@ -22,7 +22,6 @@ def make_and_solve_ILP(filename):
     group_sizes = np.concatenate(
         [np.array(n * [i + 1], dtype=int) for i, n in people.items()]
     )
-
     people_amount = np.sum(group_sizes)
     print(
         group_amount,
@@ -31,6 +30,14 @@ def make_and_solve_ILP(filename):
         "total people waiting:",
         people_amount,
     )
+
+    legals = dict() 
+    for size, amt in people.items():
+        if amt > 0:
+            legals[size] = find_legal_start_positions(size+1, cinema) 
+            print(size, legals[size])
+    sys.exit(0)
+
 
     # Instantiate a gurobi ILP model
     model = gp.Model()

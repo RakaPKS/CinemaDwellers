@@ -6,6 +6,24 @@ def count_seated(matrix):
     return np.count_nonzero(matrix == 2)
 
 
+def find_legal_start_positions(n, seats):
+    """
+    n:     amount of people in the group
+    seats: matrix of seats 
+    output: List of possible start positions
+    """
+    opts = []
+    for j, row in enumerate(seats):
+        indices = np.where(np.concatenate(([row[0]], row[:-1] != row[1:], [True])))[
+            0
+        ]
+        a = np.diff(indices)[::2]
+        for i, z in enumerate(a):
+            if n <= z:
+                opts.append((j, indices[i * 2]))
+    return opts
+
+
 def check_legal(size1, size2, x1, x2, y1, y2):
     """Checks whether two group start positions are legal"""
     # Groups seated in the same row
