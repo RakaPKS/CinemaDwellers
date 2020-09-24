@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+ed utils import utils
 
 def placeGroup(cinema, x, y, groupSize):
     for i in range(-1, groupSize + 1):
@@ -20,7 +21,7 @@ def countDisabledSeats(cinema, x, y, groupSize):
     for i in range(-1, groupSize + 1):
         for j in range(-1, 2):
             if x + i >= 0  and x + i < len(cinema) and y + j < len(cinema[0]) and y + j >= 0 and cinema[x + i][y + j] == 1:
-                result += 1
+                result += 1 - abs(j) * 0.01
     if x - 2 >= 0 and cinema[x - 2][y] == 1:
         result += 1
     if x + groupSize + 1 < len(cinema) and cinema[x + groupSize + 1][y] == 1:
@@ -85,3 +86,5 @@ with open(filename, "r") as f:
         totalPeople += amt
 
     print("Seated " + str(countSeated(problem))  + " people out of " + str(totalPeople) + " total people.")
+    
+    utils.verify_cinema(problem, h ,v)
