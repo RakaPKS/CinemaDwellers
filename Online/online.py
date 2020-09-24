@@ -62,29 +62,33 @@ def countSeated(cinema):
                 res += 1
     return res
 
-filename="cinema_online.txt"
-with open(filename, "r") as f:
-    lines = f.readlines()
-    h = int(lines[0].strip())
-    v = int(lines[1].strip())
-    people = {}
-    problem = np.zeros((v, h))
-    for amt, i in enumerate(lines[-1].split()):
-        people[amt] = int(i)
-    for i, line in enumerate(lines[2 : v - 3]):
-        problem[:, i] = np.array([bool(int(z)) for z in line.strip()])
-    
-    for i in range(len(people)):
-        (x, y) = findBestPos(people[i], problem)
-        if (x, y) != (-1, -1):
-            placeGroup(problem, x, y, people[i])
-    
-    printCinema(problem)
+def main():
+    filename="cinema_online.txt"
+    with open(filename, "r") as f:
+        lines = f.readlines()
+        h = int(lines[0].strip())
+        v = int(lines[1].strip())
+        people = {}
+        problem = np.zeros((v, h))
+        for amt, i in enumerate(lines[-1].split()):
+            people[amt] = int(i)
+        for i, line in enumerate(lines[2 : v - 3]):
+            problem[:, i] = np.array([bool(int(z)) for z in line.strip()])
 
-    totalPeople = 0
-    for (i, amt) in people.items():
-        totalPeople += amt
+        for i in range(len(people)):
+            (x, y) = findBestPos(people[i], problem)
+            if (x, y) != (-1, -1):
+                placeGroup(problem, x, y, people[i])
 
-    print("Seated " + str(countSeated(problem))  + " people out of " + str(totalPeople) + " total people.")
-    
-    utils.verify_cinema(problem, h ,v)
+        printCinema(problem)
+
+        totalPeople = 0
+        for (i, amt) in people.items():
+            totalPeople += amt
+
+        print("Seated " + str(countSeated(problem))  + " people out of " + str(totalPeople) + " total people.")
+
+        utils.verify_cinema(problem, h ,v)
+        
+if __name__ == "__main__":
+    main()
