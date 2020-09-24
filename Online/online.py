@@ -2,6 +2,8 @@ import argparse
 import numpy as np
 import utils
 
+maxdisabled = 0
+
 def placeGroup(cinema, x, y, groupSize):
     for i in range(-1, groupSize + 1):
         for j in range(-1, 2):
@@ -21,11 +23,14 @@ def countDisabledSeats(cinema, x, y, groupSize):
     for i in range(-1, groupSize + 1):
         for j in range(-1, 2):
             if x + i >= 0  and x + i < len(cinema) and y + j < len(cinema[0]) and y + j >= 0 and cinema[x + i][y + j] == 1:
-                result += 1 - abs(j) * 0.01
+                result += 1.0 - abs(j) * (1.0/100)
     if x - 2 >= 0 and cinema[x - 2][y] == 1:
         result += 1
     if x + groupSize + 1 < len(cinema) and cinema[x + groupSize + 1][y] == 1:
         result += 1
+    global maxdisabled
+    if result > maxdisabled:
+        maxdisabled = result
     return result
 
 def doesGroupFit(cinema, x, y, groupSize):
@@ -41,7 +46,7 @@ def findBestPos(groupSize, cinema):
         for i in range(len(cinema)):
             if doesGroupFit(cinema, i, j, groupSize):
                 newDisabledSeats = countDisabledSeats(cinema, i, j, groupSize)
-                if newDisabledSeats > 0 and newDisabledSeats < disabledSeats:
+                if newDisabledSeats > 0 and abs(newDisabledSeats - disabledSeats) > 0.0005 and newDisabledSeats < disabledSeats:
                     startPos = (i, j)
                     disabledSeats = newDisabledSeats
     return startPos
