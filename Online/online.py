@@ -1,6 +1,6 @@
 import argparse
 import numpy as np
-ed utils import utils
+import utils
 
 def placeGroup(cinema, x, y, groupSize):
     for i in range(-1, groupSize + 1):
