@@ -210,7 +210,7 @@ class Seating:
             indices = ones(row)
             diffs = np.diff(indices).flatten()
             for size, t in zip(diffs, indices):
-                current_size = size 
+                current_size = size
                 current_pos = t[0]
                 while current_size >= n:
                     opts.append((i, current_pos))

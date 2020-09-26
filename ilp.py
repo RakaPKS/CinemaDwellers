@@ -8,9 +8,17 @@ from tqdm import tqdm
 import gurobipy as gp
 from gurobipy import GRB
 
-from solve import read_instance
 from seating import Seating
-from utils import check_legal, count_seated, verify_cinema, get_invalid_seats, find_legal_start_positions
+from utils import (
+    read_instance,
+    check_legal,
+    count_seated,
+    verify_cinema,
+    get_invalid_seats,
+    find_legal_start_positions,
+    filter_people,
+)
+
 
 def make_and_solve_ILP(filename):
     """
@@ -18,6 +26,10 @@ def make_and_solve_ILP(filename):
     """
     # Prepare our problem instance
     cinema, people, ys, xs = read_instance(filename)
+
+    # Filter all the people that cannot be seated.
+    # This will mean less variables in our ILP problem
+    people = filter_people(cinema, people)
 
     group_amount = int(np.sum([z for _, z in people.items()]))
     group_sizes = np.concatenate(
@@ -32,12 +44,12 @@ def make_and_solve_ILP(filename):
         people_amount,
     )
     start = time.time()
+
     # Collect legal positions per group size only once
-    legals = dict() 
+    legals = dict()
     for size, amt in people.items():
         if amt > 0:
-            legals[size+1] = find_legal_start_positions(size+1, cinema) 
-
+            legals[size + 1] = find_legal_start_positions(size + 1, cinema)
 
     # Instantiate a gurobi ILP model
     model = gp.Model()
@@ -79,8 +91,8 @@ def make_and_solve_ILP(filename):
                 if any_zeros:
                     model.addConstr(seated[x, y, g], GRB.EQUAL, 0)
 
-    print("Out of bounds encoding in  %s seconds" % (time.time() - start)); start = time.time()
-
+    print("Out of bounds encoding in  %s seconds" % (time.time() - start))
+    start = time.time()
 
     # For every combination of groups g1, g2
     for g1 in tqdm(range(group_amount)):
@@ -90,16 +102,14 @@ def make_and_solve_ILP(filename):
                 size2 = group_sizes[g2]
                 # Look for all illegal combinations
                 # Start with every possible position where g1 can be seated using the legals dictionary
-                for (y1, x1) in legals[size1]: 
-                        # Calculate illegal seats for g2 given this start position
-                        invalid_seats = get_invalid_seats(x1, y1, size1, size2, xs, ys)
-                        # Add a constraint, only one group can be seated in this area (<= 1)
-                        for (x2, y2) in invalid_seats:
-                            model.addConstr(
-                                seated[x1, y1, g1] + seated[x2, y2, g2],
-                                GRB.LESS_EQUAL,
-                                1,
-                            )
+                for (y1, x1) in legals[size1]:
+                    # Calculate illegal seats for g2 given this start position
+                    invalid_seats = get_invalid_seats(x1, y1, size1, size2, xs, ys)
+                    # Add a constraint, only one group can be seated in this area (<= 1)
+                    for (x2, y2) in invalid_seats:
+                        model.addConstr(
+                            seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1,
+                        )
 
     # TODO: Add more constraints that will help fastness of solver
 
@@ -117,7 +127,11 @@ def make_and_solve_ILP(filename):
         GRB.MAXIMIZE,
     )
 
-    print("DONE ENCODING IN %s seconds.. STARTING OPTIMIZATION... " % (time.time() - start)); start = time.time()
+    print(
+        "DONE ENCODING IN %s seconds.. STARTING OPTIMIZATION... "
+        % (time.time() - start)
+    )
+    start = time.time()
 
     model.optimize()
 
