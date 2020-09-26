@@ -8,7 +8,7 @@ from gurobipy import GRB
 
 from solve import read_instance
 from seating import Seating
-from utils import check_legal, count_seated, find_legal_start_positions
+from utils import check_legal, count_seated, verify_cinema, get_invalid_seats, find_legal_start_positions
 
 
 def make_and_solve_ILP(filename):
@@ -41,6 +41,7 @@ def make_and_solve_ILP(filename):
 
     # Instantiate a gurobi ILP model
     model = gp.Model()
+    model.setParam("Presolve", 1)
 
     seated = model.addVars(xs, ys, group_amount, vtype=GRB.BINARY, name="seated")
 
@@ -62,13 +63,13 @@ def make_and_solve_ILP(filename):
         )
 
     # Only one group per position
-    for x in range(xs):
-        for y in range(ys):
-            model.addConstr(
-                gp.quicksum([seated[x, y, g] for g in range(group_amount)]),
-                GRB.LESS_EQUAL,
-                1,
-            )
+    #for x in range(xs):
+    #    for y in range(ys):
+    #        model.addConstr(
+    #            gp.quicksum([seated[x, y, g] for g in range(group_amount)]),
+    #            GRB.LESS_EQUAL,
+    #            1,
+    #        )
 
     # Check for non-seats and out-of-bounds groups
     # Do not seat a group when it will overlap with a 0-position/the end of the cinema
@@ -90,22 +91,16 @@ def make_and_solve_ILP(filename):
     for g1 in range(group_amount):
         for g2 in range(group_amount):
             if g1 != g2:
-                # For each combination of positions (x1,y1), (x2,y2)
-                # TODO: Loop only over possible positions for each group_size.
-                # This can for instance be done using find_legal_startpositions
                 for x1 in range(xs):
-                    for x2 in range(xs):
-                        for y1 in range(ys):
-                            for y2 in range(ys):
-                                # Check if this combination of positions is illegal, if so, add a constraint
-                                if not check_legal(
-                                    group_sizes[g1], group_sizes[g2], x1, x2, y1, y2
-                                ):
-                                    model.addConstr(
-                                        seated[x1, y1, g1] + seated[x2, y2, g2],
-                                        GRB.LESS_EQUAL,
-                                        1,
-                                    )
+                    for y1 in range(ys):
+                        invalid_seats = get_invalid_seats(x1, y1, group_sizes[g1], group_sizes[g2], xs, ys)
+
+                        for (x2, y2) in invalid_seats:
+                            model.addConstr(
+                                seated[x1, y1, g1] + seated[x2, y2, g2],
+                                GRB.LESS_EQUAL,
+                                1,
+                            )
 
     # TODO: Add more constraints that will help fastness of solver
 
@@ -138,13 +133,15 @@ def make_and_solve_ILP(filename):
     print(solution)
     print("Not seated", people_amount - count_seated(solution), "out of", people_amount)
 
+    verify_cinema(solution, xs, ys)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--filename",
         type=str,
-        default="instances/instance.txt",
+        default="instances/instance2.txt",
         help="Filename with offline instance",
     )
     args = parser.parse_args()
