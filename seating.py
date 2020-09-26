@@ -2,6 +2,7 @@ import numpy as np
 from collections import deque
 import heapq
 from tqdm import tqdm
+from utils import ones
 
 
 class Seating:
@@ -201,17 +202,20 @@ class Seating:
     def find_legal_start_position(self, n, seats):
         """
         n:     amount of people in the group
-        seats: 
+        seats: matrix of seats 
+        output: List of possible start positions
         """
         opts = []
-        for j, row in enumerate(seats):
-            indices = np.where(np.concatenate(([row[0]], row[:-1] != row[1:], [True])))[
-                0
-            ]
-            a = np.diff(indices)[::2]
-            for i, z in enumerate(a):
-                if n <= z:
-                    opts.append((j, indices[i * 2]))
+        for i, row in enumerate(seats):
+            indices = ones(row)
+            diffs = np.diff(indices).flatten()
+            for size, t in zip(diffs, indices):
+                current_size = size 
+                current_pos = t[0]
+                while current_size >= n:
+                    opts.append((i, current_pos))
+                    current_pos += 1
+                    current_size -= 1
         return opts
 
     def update_seats(self, pos, n, a_s):

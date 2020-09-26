@@ -13,24 +13,6 @@ class LegalError(Enum):
     none = 4
 
 
-def find_legal_start_positions(n, seats):
-    """
-    n:     amount of people in the group
-    seats: matrix of seats 
-    output: List of possible start positions
-    """
-    opts = []
-    for j, row in enumerate(seats):
-        indices = np.where(np.concatenate(([row[0]], row[:-1] != row[1:], [True])))[
-            0
-        ]
-        a = np.diff(indices)[::2]
-        for i, z in enumerate(a):
-            if n <= z:
-                opts.append((j, indices[i * 2]))
-    return opts
-
-
 def check_legal(size1, size2, x1, x2, y1, y2):
     """Checks whether two group start positions are legal"""
     # Groups seated in the same row
@@ -165,7 +147,32 @@ class TestCheckLegal(unittest.TestCase):
         self.assertEqual(check_legal(5, 5, x1=0, x2=0, y1=2, y2=0), True)
         self.assertEqual(check_legal(5, 5, x1=0, x2=0, y1=2, y2=1), False)
 
+def ones(a):
+    # Create an array that is 1 where a is 0
+    # Pad with 0 at the end 
+    iszero = np.concatenate(([0], np.equal(a, 1).view(np.int8), [0]))
+    absdiff = np.abs(np.diff(iszero))
+    # Collect start and end position
+    ranges = np.where(absdiff == 1)[0].reshape(-1, 2)
+    return ranges
+
+
+def find_legal_start_positions(n, seats):
+    opts = []
+    for i, row in enumerate(seats):
+        indices = ones(row)
+        diffs = np.diff(indices).flatten()
+        for size, t in zip(diffs, indices):
+            current_size = size 
+            current_pos = t[0]
+            while current_size >= n:
+                opts.append((i, current_pos))
+                current_pos += 1
+                current_size -= 1
+    return opts
 
 if __name__ == "__main__":
     # unittest.main()
-    print(invalid_seats(9, 0, 1, 2, 10, 6))
+    # print(get_invalid_seats(9, 0, 1, 2, 10, 6))
+    seats = np.array([[1,1,0,1,1,1],[1,1,1,1,1,1]])
+    print(find_legal_start_positions(2, seats))
