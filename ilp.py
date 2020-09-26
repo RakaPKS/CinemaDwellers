@@ -91,9 +91,6 @@ def make_and_solve_ILP(filename):
                 if any_zeros:
                     model.addConstr(seated[x, y, g], GRB.EQUAL, 0)
 
-    print("Out of bounds encoding in  %s seconds" % (time.time() - start))
-    start = time.time()
-
     # For every combination of groups g1, g2
     for g1 in tqdm(range(group_amount)):
         for g2 in range(group_amount):
@@ -144,7 +141,7 @@ def make_and_solve_ILP(filename):
                     solution[y, x : x + group_sizes[g]] = np.zeros(group_sizes[g]) + 2
 
     print(cinema)
-    print("---")
+    print("--- Was solved in %s seconds ---" % (time.time() - start))
     print(solution)
     print("Not seated", people_amount - count_seated(solution), "out of", people_amount)
 
