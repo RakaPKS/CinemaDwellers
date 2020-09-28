@@ -2,8 +2,6 @@ import argparse
 import numpy as np
 import utils
 
-maxdisabled = 0
-
 def doesGroupFit(cinema, x, y, groupSize):
     for i in range(groupSize):
         if x + i >= len(cinema) or cinema[x + i][y] != 1:
@@ -27,18 +25,15 @@ def placeGroup(cinema, x, y, groupSize):
     ###return cinema
 
 def countDisabledSeats(cinema, x, y, groupSize):
-    result = 0
+    result = 0.0
     for i in range(-1, groupSize + 1):
         for j in range(-1, 2):
             if x + i >= 0  and x + i < len(cinema) and y + j < len(cinema[0]) and y + j >= 0 and cinema[x + i][y + j] == 1:
-                result += 1.0 - abs(j) * (1.0/100)
+                result += 1.0 - abs(j) * (0.0/100)
     if x - 2 >= 0 and cinema[x - 2][y] == 1:
         result += 1
     if x + groupSize + 1 < len(cinema) and cinema[x + groupSize + 1][y] == 1:
         result += 1
-    global maxdisabled
-    if result > maxdisabled:
-        maxdisabled = result
     return result
 
 def findBestPos(groupSize, cinema, data):
@@ -63,33 +58,34 @@ def initialize(cinema, v, h):
         for x in range(v):
             for y in range(h):
                 if doesGroupFit(cinema, x, y, i + 1):
-                    result[i,x,y] = countDisabledSeats(cinema, x, y, i + 1)
+                    result[i][x][y] = countDisabledSeats(cinema, x, y, i + 1)
                 else:
-                    result[i,x,y] = -1
+                    result[i][x][y] = -1
     return result
 
 def printCinema(cinema):
     res = ""
     for j in range(len(cinema[0])):
         for i in range(len(cinema)):
-            res += str(int(cinema[i][j])) + " "
+            res += (" " * (2 - len(str(int(cinema[i][j]))))) + str(int(cinema[i][j])) + " "
         res += "\n"
     print(res)
 
 def updateData(problem, x, y, data):
     asdf = 1
     for k in range(8):
-        for i in range (-3, k + 2):
-            for j in range(-3, 4):
-                if x + i >= 0 and x + i < len(problem) and y + j >= 0 and y + j < len(problem[1]):
-                    disabledSeats = countDisabledSeats(problem, x + i, y + j, k + 1) 
-                    if disabledSeats == 0:
-                        disabledSeats = - 1
-                    data[k][x + i][y + j] = disabledSeats
-        if x - 2 >= 0:
-            data[k][x - 2][y] = countDisabledSeats(problem, x - 2, y, k + 1)
-        if x + k + 2 < len(problem):
-            data[k][x + k + 2][y] = countDisabledSeats(problem, x + k + 2, y, k + 1)
+        for i in range (-6, k + 7):
+            for j in range(-5, 6):
+                if x + i >= 0 and x + i < len(problem) and y + j >= 0 and y + j < len(problem[0]):
+                    if doesGroupFit(problem, x + i, y + j, k + 1):
+                        disabledSeats = countDisabledSeats(problem, x + i, y + j, k + 1) 
+                        data[k][x + i][y + j] = disabledSeats
+                    else:
+                        data[k][x + i][y + j] = -1
+        ###if x - 2 >= 0:
+            ###data[k][x - 2][y] = countDisabledSeats(problem, x - 2, y, k + 1)
+        ###if x + k + 2 < len(problem):
+            ###data[k][x + k + 2][y] = countDisabledSeats(problem, x + k + 2, y, k + 1)
 
 def countSeated(cinema):
     res = 0
@@ -98,6 +94,19 @@ def countSeated(cinema):
             if cinema[i][j] == 2:
                 res += 1
     return res
+
+def checkDataVsCalc(problem, data, v, h):
+    newCalc = initialize(problem, v, h)
+    printCinema(newCalc[0])
+    printCinema(data[0])
+    for i in range(v):
+        for j in range(h):
+            if newCalc[0][i][j] != data[0][i][j]:
+                print("asdf")
+    if np.array_equal(newCalc, data):
+        return True
+    else:
+        return False
 
 def main():
     filename="cinema_online.txt"
@@ -112,15 +121,23 @@ def main():
         for i, line in enumerate(lines[2 : v + 2]):
             problem[:, i] = np.array([bool(int(z)) for z in line.strip()])
 
+        test = countDisabledSeats(problem, 0, 0, 1)
+
         data = initialize(problem, v, h)
+
+        placeGroup(problem, 3, 3, 4)
+        printCinema(problem)
 
         for i in range(len(people)):
             (x, y) = findBestPos(people[i], problem, data)
             if (x, y) != (-1, -1):
                 placeGroup(problem, x, y, people[i])
-                printCinema(data[people[i] - 1])
+                print("placed group at " + str(x) + "," + str(y) + " of size: " + str(people[i]))
                 updateData(problem, x, y, data)
-                printCinema(data[people[i] - 1])
+                if checkDataVsCalc(problem, data, v, h):
+                    print("nice")
+                else:
+                    print("not nice")
                 adsf = 1
 
         printCinema(problem)
