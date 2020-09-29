@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import time
 from seating import Seating
+from utils import read_instance
 
 
 if __name__ == "__main__":
