@@ -14,7 +14,7 @@ namespace Offline.Models.Tests
         private Cinema Cinema { get; set; }
 
         [TestInitialize]
-        public void CinemaInitisalize()
+        public void InitializeCinema()
         {
             Cinema = CinemaReader.Read(Path.GetFullPath(@"../../../TestFiles/") + "test_instance.txt");
         }
@@ -37,21 +37,23 @@ namespace Offline.Models.Tests
         public void CalculateAvailableSeatsTest()
         {
             var expectedTrueAmount = 228;
-            var amount_of_trues =0;
-            for (int i = 0 ; i < Cinema.AvailableSeats.GetLength(0); i ++){
-                for (int j = 0 ; j < Cinema.AvailableSeats.GetLength(1); j ++){
-                    //for (int g = 0 ; g < Cinema.AvailableSeats.GetLength(2); g ++){
-                        if (Cinema.AvailableSeats[i,j,0]) {
-                            amount_of_trues ++;
-                            
-                        }
-                        if (Cinema.Seats[i,j]==1){
-                            if (!Cinema.AvailableSeats[i,j,0]){
-                                throw new Exception(i + " " + j );
-                            }
-                        }
+            var amount_of_trues = 0;
+            for (int i = 0; i < Cinema.AvailableSeats.GetLength(0); i++)
+            {
+                for (int j = 0; j < Cinema.AvailableSeats.GetLength(1); j++)
+                {
+                    if (Cinema.AvailableSeats[i, j, 0])
+                    {
+                        amount_of_trues++;
 
-                    //}
+                    }
+                    if (Cinema.Seats[i, j] == 1)
+                    {
+                        if (!Cinema.AvailableSeats[i, j, 0])
+                        {
+                            throw new Exception(i + " " + j);
+                        }
+                    }
                 }
             }
             CollectionAssert.AllItemsAreUnique(Cinema.GetLegalStartingPositions(0));
@@ -122,7 +124,7 @@ namespace Offline.Models.Tests
         }
 
         [TestMethod]
-        public void VerifyCinemaTest_Diagnol_No_Violation()
+        public void VerifyCinemaTest_Diagonal_No_Violation()
         {
             Cinema.SeatGroup(1, 0, 2);
             Cinema.SeatGroup(4, 1, 2);
@@ -178,7 +180,7 @@ namespace Offline.Models.Tests
             CollectionAssert.Contains(invalidSeats, (15, 15));
 
             // Middle
-            invalidSeats = Cinema.GetInvalidSeats(3,3,2,2);
+            invalidSeats = Cinema.GetInvalidSeats(3, 3, 2, 2);
 
             Assert.AreEqual(17, invalidSeats.Length);
 

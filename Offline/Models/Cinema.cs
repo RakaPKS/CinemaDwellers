@@ -63,6 +63,7 @@ namespace Offline.Models
                         Console.WriteLine("Debug time");
                     }
                     // Store how many available we seats we have starting from this point
+                    // Default is 7 (max groups)
                     int upTo = 7;
                     for (int i = 0; i < 8; i++)
                     {
@@ -74,7 +75,7 @@ namespace Offline.Models
                             break;
                         }
                     }
-                    // Use 
+                    // Use upTo 
                     for (int groupSize = 1; groupSize <= 8; groupSize++)
                     {
                         if (upTo >= groupSize)

@@ -24,7 +24,7 @@ namespace Offline
                 env.Set("LogFile", "mip1.log");
                 env.Start();
                 Console.WriteLine(Cinema);
-                
+
                 // Create empty model
                 GRBModel model = new GRBModel(env);
 
@@ -41,6 +41,7 @@ namespace Offline
                 Console.WriteLine(Cinema);
                 Console.WriteLine(Cinema.Verify());
                 Console.WriteLine("People seated:" + Cinema.countSeated() + " out of " + Cinema.TotalNumberOfPeople);
+
                 // Dispose of model and env
                 model.Dispose();
                 env.Dispose();
@@ -71,10 +72,13 @@ namespace Offline
                     {
                         var size1 = Cinema.GroupSizes[g1];
                         var size2 = Cinema.GroupSizes[g2];
+                        // Loop over all legal start positions for group 1 
                         foreach (var pos1 in Cinema.LegalStartPositions[size1 - 1])
                         {
                             var x1 = pos1.Item1;
                             var y1 = pos1.Item2;
+
+                            // Collect invalid seats 
                             var invalidSeats = Cinema.GetInvalidSeats(x1, y1, size1, size2);
                             foreach (var pos2 in invalidSeats)
                             {
@@ -83,10 +87,7 @@ namespace Offline
                                     var x2 = pos2.Item1;
                                     var y2 = pos2.Item2;
 
-                                    if (Utils.AreTwoSeatedGroupsValid(x1, y1, x2, y2, size1, size2) != Utils.SeatingResult.NoViolation)
-                                    {
-                                        model.AddConstr(seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1, "Distance constaint");
-                                    }
+                                    model.AddConstr(seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1, "Distance constaint");
                                 }
                             }
 
