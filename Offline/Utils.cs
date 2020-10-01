@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Offline.Models; 
 
@@ -77,6 +78,40 @@ namespace Offline
             }
 
             return SeatingResult.NoViolation;
+        }
+
+        public static void TimeAction(Action action, string actionName)
+        {
+            var timer = new Stopwatch();
+            timer.Start();
+            action();
+            timer.Stop();
+
+            var ts = timer.Elapsed;
+
+            var elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+
+            Console.WriteLine($"RunTime for {actionName}" + elapsedTime);
+        }
+
+        public static T TimeFunction<T>(Func<T> func, string functionName)
+        {
+            var timer = new Stopwatch();
+            timer.Start();
+            var result = func();
+            timer.Stop();
+
+            var ts = timer.Elapsed;
+
+            var elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+
+            Console.WriteLine($"RunTime for {functionName}: " + elapsedTime);
+
+            return result;
         }
     }
 }

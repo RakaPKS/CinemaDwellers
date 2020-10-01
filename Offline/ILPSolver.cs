@@ -31,42 +31,13 @@ namespace Offline
                 // Create empty model
                 GRBModel model = new GRBModel(env);
 
-                
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
+                var grbSeated = Utils.TimeFunction(() => AddSeatedBinaryVariables(model), "Add Decision Variables");
 
-                var grbSeated = AddSeatedBinaryVariables(model);
+                Utils.TimeAction(() => AddContraints(model, grbSeated), "Add Constraints");
 
-                AddOnlyOnePositionPerGroupConstraint(model, grbSeated);
+                Utils.TimeAction(() => AddObjective(model, grbSeated), "Add Objective");
 
-                AddDoNotSeatOutOfBoundsConstraint(model, grbSeated);
-
-                AddDistanceConstraints(model, grbSeated);
-
-                AddObjective(model, grbSeated);
-
-                stopWatch.Stop();
-
-                var ts = stopWatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                    ts.Hours, ts.Minutes, ts.Seconds,
-                    ts.Milliseconds / 10);
-
-                Console.WriteLine("RunTime " + elapsedTime);
-
-                stopWatch.Start();
-                // Optimize model
-                model.Optimize();
-
-                ts = stopWatch.Elapsed;
-                elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                    ts.Hours, ts.Minutes, ts.Seconds,
-                    ts.Milliseconds / 10);
-
-                Console.WriteLine("RunTime " + elapsedTime);
-
-
-                stopWatch.Stop();
+                Utils.TimeAction(() => model.Optimize(), "Optimizing");
 
                 SeatGroups(grbSeated);
 
@@ -82,6 +53,15 @@ namespace Offline
             {
                 Console.WriteLine("Error code: " + e.ErrorCode + ". " + e.Message);
             }
+        }
+
+        private void AddContraints(GRBModel model, GRBVar[,,] seated)
+        {
+            AddOnlyOnePositionPerGroupConstraint(model, seated);
+
+            AddDoNotSeatOutOfBoundsConstraint(model, seated);
+
+            AddDistanceConstraints(model, seated);
         }
 
         private void AddDistanceConstraints(GRBModel model, GRBVar[,,] seated)
