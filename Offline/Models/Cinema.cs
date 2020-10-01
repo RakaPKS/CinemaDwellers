@@ -11,8 +11,8 @@ namespace Offline.Models
         public int[,] Seats { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-
         public int TotalNumberOfGroups { get; set; }
+        public int[] GroupSizes { get; set; }
 
         public Cinema(Dictionary<int, int> groups, int[,] seats, int width, int height)
         {
@@ -21,21 +21,7 @@ namespace Offline.Models
             Width = width;
             Height = height;
             TotalNumberOfGroups = Groups.Sum(kv => kv.Value);
-        }
-
-        public double[] GetGroupsAsArray()
-        {
-            var result = new List<double>(TotalNumberOfGroups);
-
-            for (int i = 1; i < 9; i++)
-            {
-                for (int j = 0; j < Groups[i]; j++)
-                {
-                    result.Add(i);
-                }
-            }
-
-            return result.ToArray();
+            GroupSizes = GetGroupsAsArray();
         }
 
         public void SeatGroup(int startX, int startY, int groupSize)
@@ -154,5 +140,21 @@ namespace Offline.Models
 
             return builder.ToString();
         }
+
+        private int[] GetGroupsAsArray()
+        {
+            var result = new List<int>(TotalNumberOfGroups);
+
+            for (int i = 1; i < 9; i++)
+            {
+                for (int j = 0; j < Groups[i]; j++)
+                {
+                    result.Add(i);
+                }
+            }
+
+            return result.ToArray();
+        }
+
     }
 }

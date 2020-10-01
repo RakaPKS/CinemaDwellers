@@ -31,11 +31,16 @@ namespace Offline
                     }
                 }
 
-                for (int groupSize = 1; groupSize < 9; groupSize++)
+                var groupsAsString = reader.ReadLine();
+                var groupSize = 1;
+
+                foreach (var groupCount in groupsAsString.Split(' '))
                 {
-                    var count = reader.Read() - 48;
-                    reader.Read();
-                    groups.Add(groupSize, count);
+                    if (!string.IsNullOrWhiteSpace(groupCount))
+                    {
+                        groups.Add(groupSize, int.Parse(groupCount));
+                        groupSize++;
+                    }
                 }
             }
 
