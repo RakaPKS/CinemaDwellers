@@ -7,6 +7,7 @@ import numpy as np
 from tqdm import tqdm
 import gurobipy as gp
 from gurobipy import GRB
+from collections import defaultdict 
 
 from seating import Seating
 from utils import (
@@ -20,7 +21,7 @@ from utils import (
 )
 
 
-def make_and_solve_ILP(filename):
+def make_and_solve_ILP(filename, optimized=False):
     """
     Encodes and solves ILP
     """
@@ -35,6 +36,7 @@ def make_and_solve_ILP(filename):
     group_sizes = np.concatenate(
         [np.array(n * [i + 1], dtype=int) for i, n in people.items()]
     )
+    max_group_size = np.max(group_sizes)
     people_amount = np.sum(group_sizes)
     print(
         group_amount,
@@ -51,6 +53,12 @@ def make_and_solve_ILP(filename):
         if amt > 0:
             legals[size + 1] = find_legal_start_positions(size + 1, cinema)
 
+    # Collect group sizes 
+    size_to_group = defaultdict(list)
+    for i, group_size in enumerate(group_sizes): 
+        size_to_group[group_size].append(i)
+    #sys.exit(0)
+    print(size_to_group)
     # Instantiate a gurobi ILP model
     model = gp.Model()
     model.setParam("Presolve", 1)
@@ -91,25 +99,44 @@ def make_and_solve_ILP(filename):
                 if any_zeros:
                     model.addConstr(seated[x, y, g], GRB.EQUAL, 0)
 
-    # For every combination of groups g1, g2
-    for g1 in tqdm(range(group_amount)):
-        for g2 in range(group_amount):
-            if g1 != g2:
-                size1 = group_sizes[g1]
-                size2 = group_sizes[g2]
-                # Look for all illegal combinations
-                # Start with every possible position where g1 can be seated using the legals dictionary
-                for (y1, x1) in legals[size1]:
-                    # Calculate illegal seats for g2 given this start position
-                    invalid_seats = get_invalid_seats(x1, y1, size1, size2, xs, ys)
-                    # Add a constraint, only one group can be seated in this area (<= 1)
-                    for (x2, y2) in invalid_seats:
-                        model.addConstr(
-                            seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1,
-                        )
+   
+    
+    if optimized:
+        for size1 in tqdm(range(1,max_group_size+1)):
+            for size2 in range(1,max_group_size+1):
+                    # Look for all illegal combinations
+                    # Start with every possible position where g1 can be seated using the legals dictionary
+                    for (y1, x1) in legals[size1]:
+                        # Calculate illegal seats for g2 given this start position
+                        invalid_seats = get_invalid_seats(x1, y1, size1, size2, xs, ys)
+                        # Add a constraint, only one group can be seated in this area (<= 1)
+                        for (x2, y2) in invalid_seats:
+                            # For every combination of groups with these specific sizes
+                            for g1 in size_to_group[size1]:
+                                for g2 in size_to_group[size2]:
+                                    if  g1 != g2:
+                                        model.addConstr(
+                                            seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1,
+                                        )
+    else:
+        # For every combination of groups g1, g2
+        for g1 in tqdm(range(group_amount)):
+            for g2 in range(group_amount):
+                if g1 > g2:
+                    size1 = group_sizes[g1]
+                    size2 = group_sizes[g2]
+                    for (y1, x1) in legals[size1]:
+                        # Calculate illegal seats for g2 given this start position
+                        invalid_seats = get_invalid_seats(x1, y1, size1, size2, xs, ys)
+                        # Add a constraint, only one group can be seated in this area (<= 1)
+                        for (x2, y2) in invalid_seats:
+                            model.addConstr(
+                                seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1,
+                            )
+                        del invalid_seats
 
     # TODO: Add more constraints that will help fastness of solver
-
+    
     # Maximize number of people seated = seated_g * group_size_g
     # TODO: Set objective maximum manually to help gurobi.
     model.setObjective(
@@ -156,6 +183,12 @@ if __name__ == "__main__":
         default="instances/instance3.txt",
         help="Filename with offline instance",
     )
+    parser.add_argument(
+        "--optimize",
+        type=bool,
+        default='',
+        help="Use our Optimized^TM group looper",
+    )
     args = parser.parse_args()
 
-    make_and_solve_ILP(args.filename)
+    make_and_solve_ILP(args.filename, args.optimize)
