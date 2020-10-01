@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "newOnline": {
+      "commandName": "Project",
+      "commandLineArgs": "< cinema_online.txt"
+    }
+  }
+}
