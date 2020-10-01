@@ -15,7 +15,7 @@ namespace Offline.Models
         public int TotalNumberOfGroups { get; set; }
         public int TotalNumberOfPeople { get; private set; }
         public int[] GroupSizes { get; set; }
-        private Dictionary<(int,int,int,int), (int,int)[]> InvalidSeatsMap { get; set; }
+        private Dictionary<(int, int, int, int), (int, int)[]> InvalidSeatsMap { get; set; }
 
         public (int, int)[][] LegalStartPositions { get; private set; }
 
@@ -26,20 +26,20 @@ namespace Offline.Models
             Height = height;
             CalculateAvailableSeats();
 
-            Groups = groups; //new Dictionary<int, int>();
+            Groups = new Dictionary<int, int>();
 
             // Filter groups that don't fit as pre-processing step 
-            // foreach (var g in groups)
-            // {
-            //     if (GetLegalStartingPositions(g.Key - 1).Length > 0)
-            //     {
-            //         Groups[g.Key] = g.Value;
-            //     }
-            // }
+            foreach (var g in groups)
+            {
+                if (GetLegalStartingPositions(g.Key - 1).Length > 0)
+                {
+                    Groups[g.Key] = g.Value;
+                }
+            }
 
             TotalNumberOfGroups = Groups.Sum(kv => kv.Value);
             GroupSizes = GetGroupsAsArray();
-            TotalNumberOfPeople = GroupSizes.Sum(); 
+            TotalNumberOfPeople = GroupSizes.Sum();
 
             // Initialize legal start positions for each possible group size 
             LegalStartPositions = new (int, int)[8][];
@@ -47,7 +47,7 @@ namespace Offline.Models
             {
                 LegalStartPositions[g] = GetLegalStartingPositions(g);
             }
-            
+
             InvalidSeatsMap = new Dictionary<(int, int, int, int), (int, int)[]>();
         }
 
@@ -58,7 +58,7 @@ namespace Offline.Models
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    if (x==0 & y ==1)
+                    if (x == 0 & y == 1)
                     {
                         Console.WriteLine("Debug time");
                     }
@@ -105,7 +105,7 @@ namespace Offline.Models
             return result.ToArray();
         }
 
-       public (int, int)[] GetInvalidSeats(int startX, int startY, int size1, int size2)
+        public (int, int)[] GetInvalidSeats(int startX, int startY, int size1, int size2)
         {
             var key = (startX, startY, size1, size2);
 
@@ -143,7 +143,7 @@ namespace Offline.Models
                     {
                         result.Add((x2, below));
                     }
-                }         
+                }
             }
 
             var resultAsArray = result.ToArray();
@@ -252,7 +252,7 @@ namespace Offline.Models
             return res;
         }
 
-        
+
 
         public override string ToString()
         {

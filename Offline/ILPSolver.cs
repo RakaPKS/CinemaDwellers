@@ -3,7 +3,7 @@ using Offline.Models;
 using System;
 using System.Diagnostics;
 using System.Threading;
-
+using System.Linq;
 namespace Offline
 {
     public class ILPSolver
@@ -24,6 +24,7 @@ namespace Offline
                 env.Set("LogFile", "mip1.log");
                 env.Start();
                 Console.WriteLine(Cinema);
+                
                 // Create empty model
                 GRBModel model = new GRBModel(env);
 
@@ -70,25 +71,25 @@ namespace Offline
                     {
                         var size1 = Cinema.GroupSizes[g1];
                         var size2 = Cinema.GroupSizes[g2];
-                        //foreach (var pos1 in Cinema.LegalStartPositions[size1])
-                        //{
-                        //   var x1 = pos1.Item1;
-                        //    var y1 = pos1.Item2;
-                        for (int x1 = 0; x1 < Cinema.Width; x1++)
+                        foreach (var pos1 in Cinema.LegalStartPositions[size1 - 1])
                         {
-                            for (int y1 = 0; y1 < Cinema.Height; y1++)
+                            var x1 = pos1.Item1;
+                            var y1 = pos1.Item2;
+                            var invalidSeats = Cinema.GetInvalidSeats(x1, y1, size1, size2);
+                            foreach (var pos2 in invalidSeats)
                             {
-                                for (int x2 = 0; x2 < Cinema.Width; x2++)
+                                if (Cinema.LegalStartPositions[size2 - 1].Any(m => m == pos2))
                                 {
-                                    for (int y2 = 0; y2 < Cinema.Height; y2++)
+                                    var x2 = pos2.Item1;
+                                    var y2 = pos2.Item2;
+
+                                    if (Utils.AreTwoSeatedGroupsValid(x1, y1, x2, y2, size1, size2) != Utils.SeatingResult.NoViolation)
                                     {
-                                        if (Utils.AreTwoSeatedGroupsValid(x1, y1, x2, y2, size1, size2) != Utils.SeatingResult.NoViolation)
-                                        {
-                                            model.AddConstr(seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1, "Distance constaint");
-                                        }
+                                        model.AddConstr(seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1, "Distance constaint");
                                     }
                                 }
                             }
+
                         }
                     }
                 }
