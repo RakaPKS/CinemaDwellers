@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Xunit.Sdk;
 using System.IO;
 using System;
+using System.Linq;
 
 namespace Offline.Models.Tests
 {
@@ -15,7 +16,7 @@ namespace Offline.Models.Tests
         [TestInitialize]
         public void CinemaInitisalize()
         {
-            Cinema = CinemaReader.Read(Path.GetFullPath(@"..\..\..\TestFiles\") + "test_instance.txt");
+            Cinema = CinemaReader.Read(Path.GetFullPath(@"../../../TestFiles/") + "test_instance.txt");
         }
 
         [TestMethod]
@@ -29,7 +30,32 @@ namespace Offline.Models.Tests
         {
             var expectedArray = new int[] { 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 7 };
 
-            CollectionAssert.AreEqual(expectedArray, Cinema.GetGroupsAsArray());
+            CollectionAssert.AreEqual(expectedArray, Cinema.GroupSizes);
+        }
+
+        [TestMethod]
+        public void CalculateAvailableSeatsTest()
+        {
+            var expectedTrueAmount = 230;
+            var amount_of_trues =0;
+            for (int i = 0 ; i < Cinema.AvailableSeats.GetLength(0); i ++){
+                for (int j = 0 ; j < Cinema.AvailableSeats.GetLength(1); j ++){
+                    //for (int g = 0 ; g < Cinema.AvailableSeats.GetLength(2); g ++){
+                        if (Cinema.AvailableSeats[i,j,0]) {
+                            amount_of_trues ++;
+                            
+                        }
+                        if (Cinema.Seats[i,j]==1){
+                            if (!Cinema.AvailableSeats[i,j,0]){
+                                throw new Exception(i + " " + j );
+                            }
+                        }
+
+                    //}
+                }
+            }
+            CollectionAssert.AllItemsAreUnique(Cinema.GetLegalStartingPositions(0));
+            Assert.AreEqual(expectedTrueAmount, amount_of_trues);
         }
 
         [TestMethod]
