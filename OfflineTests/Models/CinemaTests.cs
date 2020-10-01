@@ -29,7 +29,7 @@ namespace Offline.Models.Tests
         {
             var expectedArray = new int[] { 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 7 };
 
-            CollectionAssert.AreEqual(expectedArray, Cinema.GetGroupsAsArray());
+            CollectionAssert.AreEqual(expectedArray, Cinema.GroupSizes);
         }
 
         [TestMethod]
@@ -102,6 +102,83 @@ namespace Offline.Models.Tests
             Cinema.SeatGroup(4, 1, 2);
 
             Assert.IsTrue(Cinema.Verify());
+        }
+
+        [TestMethod()]
+        public void GetInvalidSeatsTest()
+        {
+            // Top left corner
+            var invalidSeats = Cinema.GetInvalidSeats(0, 0, 1, 1);
+
+            Assert.AreEqual(5, invalidSeats.Length);
+
+            CollectionAssert.Contains(invalidSeats, (0, 0));
+            CollectionAssert.Contains(invalidSeats, (1, 0));
+            CollectionAssert.Contains(invalidSeats, (2, 0));
+            CollectionAssert.Contains(invalidSeats, (1, 1));
+            CollectionAssert.Contains(invalidSeats, (0, 1));
+
+            // Top right corner
+            invalidSeats = Cinema.GetInvalidSeats(16, 0, 1, 1);
+
+            Assert.AreEqual(5, invalidSeats.Length);
+
+            CollectionAssert.Contains(invalidSeats, (16, 0));
+            CollectionAssert.Contains(invalidSeats, (15, 0));
+            CollectionAssert.Contains(invalidSeats, (14, 0));
+            CollectionAssert.Contains(invalidSeats, (15, 1));
+            CollectionAssert.Contains(invalidSeats, (16, 1));
+
+            // Bottom left corner
+            invalidSeats = Cinema.GetInvalidSeats(0, 16, 1, 1);
+
+            Assert.AreEqual(5, invalidSeats.Length);
+
+            CollectionAssert.Contains(invalidSeats, (0, 16));
+            CollectionAssert.Contains(invalidSeats, (0, 15));
+            CollectionAssert.Contains(invalidSeats, (1, 16));
+            CollectionAssert.Contains(invalidSeats, (2, 16));
+            CollectionAssert.Contains(invalidSeats, (1, 15));
+
+            // Bottom right corner
+            invalidSeats = Cinema.GetInvalidSeats(16, 16, 1, 1);
+
+            Assert.AreEqual(5, invalidSeats.Length);
+
+            CollectionAssert.Contains(invalidSeats, (16, 16));
+            CollectionAssert.Contains(invalidSeats, (15, 16));
+            CollectionAssert.Contains(invalidSeats, (14, 16));
+            CollectionAssert.Contains(invalidSeats, (16, 15));
+            CollectionAssert.Contains(invalidSeats, (15, 15));
+
+            // Middle
+            invalidSeats = Cinema.GetInvalidSeats(3,3,2,2);
+
+            Assert.AreEqual(17, invalidSeats.Length);
+
+            CollectionAssert.Contains(invalidSeats, (0, 3));
+
+            CollectionAssert.Contains(invalidSeats, (1, 2));
+            CollectionAssert.Contains(invalidSeats, (1, 3));
+            CollectionAssert.Contains(invalidSeats, (1, 4));
+
+            CollectionAssert.Contains(invalidSeats, (2, 2));
+            CollectionAssert.Contains(invalidSeats, (2, 3));
+            CollectionAssert.Contains(invalidSeats, (2, 4));
+
+            CollectionAssert.Contains(invalidSeats, (3, 2));
+            CollectionAssert.Contains(invalidSeats, (3, 3));
+            CollectionAssert.Contains(invalidSeats, (3, 4));
+
+            CollectionAssert.Contains(invalidSeats, (4, 2));
+            CollectionAssert.Contains(invalidSeats, (4, 3));
+            CollectionAssert.Contains(invalidSeats, (4, 4));
+
+            CollectionAssert.Contains(invalidSeats, (5, 2));
+            CollectionAssert.Contains(invalidSeats, (5, 3));
+            CollectionAssert.Contains(invalidSeats, (5, 4));
+
+            CollectionAssert.Contains(invalidSeats, (6, 3));
         }
     }
 }

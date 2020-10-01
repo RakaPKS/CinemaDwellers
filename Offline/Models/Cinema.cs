@@ -11,10 +11,10 @@ namespace Offline.Models
         public int[,] Seats { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-
         public bool[,,] AvailableSeats { get; set; }
         public int TotalNumberOfGroups { get; set; }
         public int[] GroupSizes { get; set; }
+        private Dictionary<(int,int,int,int), (int,int)[]> InvalidSeatsMap { get; set; }
 
         public (int, int)[][] LegalStartPositions { get; private set; }
 
@@ -29,7 +29,7 @@ namespace Offline.Models
 
             // Filter groups that don't fit as pre-processing step 
             foreach (var g in groups){
-                if (GetLegalStartingPositions(g.Key).Length > 0 ){
+                if (GetLegalStartingPositions(g.Key - 1).Length > 0 ){
                     Groups[g.Key] = g.Value;
                 }
             }
@@ -41,6 +41,8 @@ namespace Offline.Models
             }
 
             TotalNumberOfGroups = Groups.Sum(kv => kv.Value);
+
+            InvalidSeatsMap = new Dictionary<(int, int, int, int), (int, int)[]>();
         }
 
         public void CalculateAvailableSeats()
@@ -70,7 +72,6 @@ namespace Offline.Models
             }
         }
 
-
         public (int, int)[] GetLegalStartingPositions(int group_size){
             var result = new List<(int,int)>();
             var seats = Seats;
@@ -86,21 +87,54 @@ namespace Offline.Models
             return result.ToArray();
         }
 
-        public double[] GetGroupsAsArray()
+        public (int, int)[] GetInvalidSeats(int startX, int startY, int size1, int size2)
         {
-            var result = new List<double>(TotalNumberOfGroups);
+            var key = (startX, startY, size1, size2);
 
-            for (int i = 1; i < 9; i++)
+            if (InvalidSeatsMap.ContainsKey(key))
             {
-                for (int j = 0; j < Groups[i]; j++)
+                return InvalidSeatsMap[key];
+            }
+
+            var result = new List<(int, int)>();
+            size1--;
+            size2--;
+
+            for (int x2 = (startX - size2 - 2); x2 < (startX + size1 + 3); x2++)
+            {
+                if (x2 >= 0 && x2 < Width)
                 {
-                    result.Add(i);
+                    result.Add((x2, startY));
                 }
             }
 
-            return result.ToArray();
-            GroupSizes = GetGroupsAsArray();
+            for (int x2 = (startX - size2 - 1); x2 < (startX + size1 + 2); x2++)
+            {
+                if (x2 >= 0 && x2 < Width)
+                {
+                    var above = startY + 1;
+
+                    if (above >= 0 && above < Height)
+                    {
+                        result.Add((x2, above));
+                    }
+
+                    var below = startY - 1;
+
+                    if (below >= 0)
+                    {
+                        result.Add((x2, below));
+                    }
+                }         
+            }
+
+            var resultAsArray = result.ToArray();
+
+            InvalidSeatsMap.Add(key, resultAsArray);
+
+            return resultAsArray;
         }
+
 
         public void SeatGroup(int startX, int startY, int groupSize)
         {
