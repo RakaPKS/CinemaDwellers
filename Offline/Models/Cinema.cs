@@ -12,15 +12,77 @@ namespace Offline.Models
         public int Width { get; set; }
         public int Height { get; set; }
 
+        public bool[,,] AvailableSeats { get; set; }
         public int TotalNumberOfGroups { get; set; }
+
+        public (int, int)[][] LegalStartPositions { get; private set; }
 
         public Cinema(Dictionary<int, int> groups, int[,] seats, int width, int height)
         {
-            Groups = groups;
             Seats = seats;
             Width = width;
             Height = height;
+            CalculateAvailableSeats();
+
+            Groups = new Dictionary<int, int>();
+
+            // Filter groups that don't fit as pre-processing step 
+            foreach (var g in groups){
+                if (GetLegalStartingPositions(g.Key).Length > 0 ){
+                    Groups[g.Key] = g.Value;
+                }
+            }
+
+            // Initialize legal start positions for each possible group size 
+            LegalStartPositions = new (int, int)[8][]; 
+            for (int g = 0; g < 8; g++){
+                LegalStartPositions[g] = GetLegalStartingPositions(g);
+            }
+
             TotalNumberOfGroups = Groups.Sum(kv => kv.Value);
+        }
+
+        public void CalculateAvailableSeats()
+        {
+            AvailableSeats = new bool[Width,Height,8];
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    // Store how many available we seats we have starting from this point
+                    int upTo = -1;
+                    for (int i = 0; i < 8; i++)
+                    {
+                        if (x + i >= Width || Seats[x + i, y] == 0)
+                        {
+                            upTo = i;
+                            break;
+                        }
+                    }
+                    // Use 
+                    for (int groupSize= 1; groupSize <=8 ; groupSize++){
+                        if (upTo >= groupSize-1){ 
+                            AvailableSeats[x,y,groupSize-1] = true;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        public (int, int)[] GetLegalStartingPositions(int group_size){
+            var result = new List<(int,int)>();
+            var seats = Seats;
+
+            for (int row = 0; row < Width; row ++){
+                for (int col = 0; col < Height; col ++){
+                    if (AvailableSeats[row,col,group_size]){
+                        result.Add((row,col));
+                    }
+                }
+
+            }
+            return result.ToArray();
         }
 
         public double[] GetGroupsAsArray()

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Offline.Models; 
 
 namespace Offline
 {
     public class Utils
     {
+        
         public static double[] GenerateArrayOfOnes(int count)
         {
             var result = new double[count];

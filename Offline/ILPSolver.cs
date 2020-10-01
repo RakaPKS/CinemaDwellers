@@ -16,6 +16,7 @@ namespace Offline
         {
             Cinema = cinema;
             GroupSizes = Cinema.GetGroupsAsArray();
+            
         }
 
         public void Solve()
@@ -26,10 +27,11 @@ namespace Offline
                 GRBEnv env = new GRBEnv(true);
                 env.Set("LogFile", "mip1.log");
                 env.Start();
-
+                Console.WriteLine(Cinema);
                 // Create empty model
                 GRBModel model = new GRBModel(env);
 
+                
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
 
