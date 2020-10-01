@@ -23,9 +23,9 @@ namespace Offline.Models
             TotalNumberOfGroups = Groups.Sum(kv => kv.Value);
         }
 
-        public int[] GetGroupsAsArray()
+        public double[] GetGroupsAsArray()
         {
-            var result = new List<int>(TotalNumberOfGroups);
+            var result = new List<double>(TotalNumberOfGroups);
 
             for (int i = 1; i < 9; i++)
             {
@@ -46,14 +46,14 @@ namespace Offline.Models
                 {
                     Seats[x, startY] = 2;
                 }
-                else
+                else if (Seats[x, startY] == 0)
                 {
-                    throw new Exception("Cannot seate a group at a 0 position");
+                    throw new Exception("Cannot seat a group at a 0 position");
                 }
             }
         }
 
-        public bool VerifyCinema()
+        public bool Verify()
         {
             var seatedGroups = FindAllSeatedGroups();
 
@@ -115,6 +115,13 @@ namespace Offline.Models
                         }
                     }
                 }
+
+                if (firstPerson != (-1, -1))
+                {
+                    seatedGroups[firstPerson] = groupSize;
+                    groupSize = 0;
+                    firstPerson = (-1, -1);
+                }
             }
 
             return seatedGroups;
@@ -130,11 +137,11 @@ namespace Offline.Models
             builder.Append(Height);
             builder.AppendLine();
 
-            for (int i = 0; i < Seats.GetLength(0); i++)
+            for (int i = 0; i < Seats.GetLength(1); i++)
             {
-                for (int j = 0; j < Seats.GetLength(1); j++)
+                for (int j = 0; j < Seats.GetLength(0); j++)
                 {
-                    builder.Append(Seats[i, j]);
+                    builder.Append(Seats[j, i]);
                 }
                 builder.AppendLine();
             }

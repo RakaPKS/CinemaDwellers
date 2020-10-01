@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="OPTANO.Modeling.Gurobi" Version="9.0.2.24" />
+    <PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
   </ItemGroup>
 
 </Project>

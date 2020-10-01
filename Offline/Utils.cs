@@ -6,6 +6,18 @@ namespace Offline
 {
     public class Utils
     {
+        public static double[] GenerateArrayOfOnes(int count)
+        {
+            var result = new double[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                result[i] = 1.0;
+            }
+
+            return result;
+        }
+
         public enum SeatingResult
         {
             HorizontalViolation = 1,
