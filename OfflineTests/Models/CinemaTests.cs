@@ -21,7 +21,7 @@ namespace Offline.Models.Tests
         [TestMethod]
         public void GetTotalNumberOfGroupsTest()
         {
-            Assert.AreEqual(33, Cinema.GetTotalNumberOfGroups());
+            Assert.AreEqual(33, Cinema.TotalNumberOfGroups);
         }
 
         [TestMethod]
@@ -56,7 +56,7 @@ namespace Offline.Models.Tests
             Cinema.SeatGroup(1, 0, 2);
             Cinema.SeatGroup(4, 0, 2);
 
-            Assert.IsFalse(Cinema.VerifyCinema());
+            Assert.IsFalse(Cinema.Verify());
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace Offline.Models.Tests
             Cinema.SeatGroup(1, 0, 2);
             Cinema.SeatGroup(3, 1, 2);
 
-            Assert.IsFalse(Cinema.VerifyCinema());
+            Assert.IsFalse(Cinema.Verify());
         }
 
         [TestMethod]
@@ -74,7 +74,7 @@ namespace Offline.Models.Tests
             Cinema.SeatGroup(1, 0, 2);
             Cinema.SeatGroup(1, 1, 2);
 
-            Assert.IsFalse(Cinema.VerifyCinema());
+            Assert.IsFalse(Cinema.Verify());
         }
 
         [TestMethod]
@@ -83,7 +83,7 @@ namespace Offline.Models.Tests
             Cinema.SeatGroup(1, 0, 2);
             Cinema.SeatGroup(5, 0, 2);
 
-            Assert.IsTrue(Cinema.VerifyCinema());
+            Assert.IsTrue(Cinema.Verify());
         }
 
         [TestMethod]
@@ -92,7 +92,7 @@ namespace Offline.Models.Tests
             Cinema.SeatGroup(1, 0, 2);
             Cinema.SeatGroup(1, 2, 2);
 
-            Assert.IsTrue(Cinema.VerifyCinema());
+            Assert.IsTrue(Cinema.Verify());
         }
 
         [TestMethod]
@@ -101,7 +101,7 @@ namespace Offline.Models.Tests
             Cinema.SeatGroup(1, 0, 2);
             Cinema.SeatGroup(4, 1, 2);
 
-            Assert.IsTrue(Cinema.VerifyCinema());
+            Assert.IsTrue(Cinema.Verify());
         }
     }
 }

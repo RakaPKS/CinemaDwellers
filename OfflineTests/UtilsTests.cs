@@ -43,5 +43,13 @@ namespace Offline.Tests
             Assert.AreEqual(SeatingResult.NoViolation, Utils.AreTwoSeatedGroupsValid(x1: 0, y1: 2, x2: 0, y2: 0, s1: 1, s2: 1));
             Assert.AreEqual(SeatingResult.NoViolation, Utils.AreTwoSeatedGroupsValid(x1: 0, y1: 2, x2: 0, y2: 0, s1: 5, s2: 5));
         }
+
+        [TestMethod()]
+        public void GenerateArrayOfOnesTest()
+        {
+            var expected = new double[10] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+
+            CollectionAssert.AreEqual(expected, Utils.GenerateArrayOfOnes(10));
+        }
     }
 }
