@@ -17,7 +17,6 @@ namespace Offline
         {
             try
             {
-                var totalNumberOfGroups = Cinema.GetTotalNumberOfGroups();
                 // Create an empty environment, set options and start
                 GRBEnv env = new GRBEnv(true);
                 env.Set("LogFile", "mip1.log");
@@ -26,10 +25,9 @@ namespace Offline
                 // Create empty model
                 GRBModel model = new GRBModel(env);
 
-                var seated = model.AddVars(Cinema.Width * Cinema.Height * totalNumberOfGroups, GRB.BINARY);
-                var sizes = model.AddVars(totalNumberOfGroups, GRB.INTEGER);
+                var grbSeated = AddSeatedBinaryVariables(model);
 
-                Console.WriteLine(seated.Length);
+                Console.WriteLine(grbSeated.Length);
 
                 // Optimize model
                 model.Optimize();
@@ -45,6 +43,24 @@ namespace Offline
             {
                 Console.WriteLine("Error code: " + e.ErrorCode + ". " + e.Message);
             }
+        }
+
+        private GRBVar[,,] AddSeatedBinaryVariables(GRBModel model)
+        {
+            var grbSeated = new GRBVar[Cinema.Width, Cinema.Height, Cinema.TotalNumberOfGroups];
+
+            for (int x = 0; x < Cinema.Width; x++)
+            {
+                for (int y = 0; y < Cinema.Height; y++)
+                {
+                    for (int g = 0; g < Cinema.TotalNumberOfGroups; g++)
+                    {
+                        grbSeated[x, y, g] = model.AddVar(0.0, 1.0, 0.0, GRB.BINARY, "seated" + x + y + g);
+                    }
+                }
+            }
+
+            return grbSeated;
         }
     }
 }
