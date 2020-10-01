@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.Json;
 using System.Threading;
 
 namespace newOnline
@@ -19,7 +15,6 @@ namespace newOnline
             for (int i = 0; i < h; i++)
             {
                 string line = Console.ReadLine();
-                int len = line.Length;
                 for (int j = 0; j < w; j++)
                 {
                     cinema[j, i] = line[j] - 48;

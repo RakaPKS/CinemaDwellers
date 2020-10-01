@@ -2,7 +2,7 @@
   "profiles": {
     "newOnline": {
       "commandName": "Project",
-      "commandLineArgs": "< ..\\..\\..\\cinema_online.txt >output.txt"
+      "commandLineArgs": "< ..\\..\\..\\TheMonsterOnline.txt >output.txt"
     }
   }
 }
