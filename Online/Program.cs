@@ -32,7 +32,7 @@ namespace newOnline
             }
 
             var seatData = initializeSeatData(cinema, w, h);
-            
+
             for (int i = 0; i < people.Count; i++)
             {
                 (int x, int y) = findBestPos(seatData, people[i]);
@@ -59,20 +59,28 @@ namespace newOnline
                 result[i] = new int[w, h];
 
             for (int k = 0; k < 8; k++)
-                for (int i = 0; i < w; i++)
-                    for (int j = 0; j < h; j++)
+                for (int j = 0; j < h; j++)
+                    for (int i = 0; i < w; i++)
                         result[k][i, j] = countDisabledSeats(cinema, i, j, k + 1);
-                    
+
             return result;
         }
 
         static void updateSeatData(int[,] cinema, int[][,] seatData, int x, int y, int groupSize)
         {
             for (int k = 0; k < 8; k++)
-                for (int i = -(4 + k); i < groupSize + 4; i++)
-                    for (int j = -2; j < 3; j++)
+                for (int j = -2; j < 3; j++)
+                    for (int i = -(4 + k); i < groupSize + 4; i++)
+                    {
+                        bool outsideBar = (i <= -(3 + k) || i >= groupSize + 2) && (Math.Abs(j) == 2);
+                        bool insidePixel = Math.Abs(j) == 1 && (i == -(4 + k) || i == groupSize + 3);
+
+                        if (outsideBar || insidePixel)
+                            continue;
+
                         if (inRange(cinema, x + i, y + j))
                             seatData[k][x + i, y + j] = countDisabledSeats(cinema, x + i, y + j, k + 1);
+                    }
         }
 
         static int countDisabledSeats(int[,] cinema, int x, int y, int groupSize)
@@ -82,9 +90,9 @@ namespace newOnline
             if (!doesGroupFit(cinema, x, y, groupSize))
                 return -1;
 
-            for (int i = -1; i < groupSize + 1; i++)
+            for (int j = -1; j < 2; j++)
             {
-                for (int j = -1; j < 2; j++)
+                for (int i = -1; i < groupSize + 1; i++)
                 {
                     if (inRange(cinema, x + i, y + j) && cinema[x + i, y + j] == 1)
                         result++;
@@ -108,10 +116,9 @@ namespace newOnline
         {
             var result = (-1, -1);
             int disabledSeats = int.MaxValue;
-
-            for (int i = 0; i < seatData[groupSize - 1].GetLength(0); i++)
+            for (int j = 0; j < seatData[groupSize - 1].GetLength(1); j++)
             {
-                for (int j = 0; j < seatData[groupSize - 1].GetLength(1); j++)
+                for (int i = 0; i < seatData[groupSize - 1].GetLength(0); i++)
                 {
                     if (seatData[groupSize - 1][i, j] != -1 && seatData[groupSize - 1][i, j] < disabledSeats)
                     {
@@ -126,28 +133,27 @@ namespace newOnline
 
         static void placeGroup(int[,] cinema, int x, int y, int groupSize)
         {
-            for (int i = -1; i < groupSize + 1; i++)
-                for (int j = -1; j < 2; j++)
+            for (int j = -1; j < 2; j++)
+                for (int i = -1; i < groupSize + 1; i++)
                     if (inRange(cinema, x + i, y + j))
-                    
                         cinema[x + i, y + j] = 0;
-                    
+
             if (inRange(cinema, x - 2, y))
                 cinema[x - 2, y] = 0;
-            
+
             if (inRange(cinema, x + groupSize + 1, y))
                 cinema[x + groupSize + 1, y] = 0;
 
             for (int i = 0; i < groupSize; i++)
                 if (inRange(cinema, x + i, y))
                     cinema[x + i, y] = 2;
-        }        
+        }
 
         static int countSeated(int[,] cinema)
         {
             int res = 0;
-            for (int i = 0; i < cinema.GetLength(0); i++)
-                for (int j = 0; j < cinema.GetLength(1); j++)
+            for (int j = 0; j < cinema.GetLength(1); j++)
+                for (int i = 0; i < cinema.GetLength(0); i++)
                     res += cinema[i, j] == 2 ? 1 : 0;
             return res;
         }
