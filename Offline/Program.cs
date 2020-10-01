@@ -7,7 +7,7 @@ namespace Offline
     {
         static void Main(string[] args)
         {
-            var cinema = CinemaReader.Read(Path.GetFullPath(@"../instances/") + "mini.txt");
+            var cinema = CinemaReader.Read(Path.GetFullPath(@"../instances/") + "instance2.txt");
             Console.WriteLine(cinema);
             var ilpSolver = new ILPSolver(cinema);
             ilpSolver.Solve();

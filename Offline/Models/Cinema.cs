@@ -14,6 +14,7 @@ namespace Offline.Models
 
         public bool[,,] AvailableSeats { get; set; }
         public int TotalNumberOfGroups { get; set; }
+        public int TotalNumberOfPeople { get; private set; }
         public int[] GroupSizes { get; set; }
 
         public (int, int)[][] LegalStartPositions { get; private set; }
@@ -25,45 +26,60 @@ namespace Offline.Models
             Height = height;
             CalculateAvailableSeats();
 
-            Groups = new Dictionary<int, int>();
+            Groups = groups; //new Dictionary<int, int>();
 
             // Filter groups that don't fit as pre-processing step 
-            foreach (var g in groups){
-                if (GetLegalStartingPositions(g.Key).Length > 0 ){
-                    Groups[g.Key] = g.Value;
-                }
-            }
+            // foreach (var g in groups)
+            // {
+            //     if (GetLegalStartingPositions(g.Key - 1).Length > 0)
+            //     {
+            //         Groups[g.Key] = g.Value;
+            //     }
+            // }
+
+            TotalNumberOfGroups = Groups.Sum(kv => kv.Value);
+            GroupSizes = GetGroupsAsArray();
+            TotalNumberOfPeople = GroupSizes.Sum(); 
 
             // Initialize legal start positions for each possible group size 
-            LegalStartPositions = new (int, int)[8][]; 
-            for (int g = 0; g < 8; g++){
+            LegalStartPositions = new (int, int)[8][];
+            for (int g = 0; g < 8; g++)
+            {
                 LegalStartPositions[g] = GetLegalStartingPositions(g);
             }
 
-            TotalNumberOfGroups = Groups.Sum(kv => kv.Value);
+
         }
 
         public void CalculateAvailableSeats()
         {
-            AvailableSeats = new bool[Width,Height,8];
+            AvailableSeats = new bool[Width, Height, 8];
             for (int x = 0; x < Width; x++)
             {
                 for (int y = 0; y < Height; y++)
                 {
+                    if (x==0 & y ==1)
+                    {
+                        Console.WriteLine("Debug time");
+                    }
                     // Store how many available we seats we have starting from this point
-                    int upTo = -1;
+                    int upTo = 7;
                     for (int i = 0; i < 8; i++)
                     {
                         if (x + i >= Width || Seats[x + i, y] == 0)
                         {
+                            // If upto=0 i cannot seat anyone
+                            // If upto=1 i can seat a group of 1 
                             upTo = i;
                             break;
                         }
                     }
                     // Use 
-                    for (int groupSize= 1; groupSize <=8 ; groupSize++){
-                        if (upTo >= groupSize-1){ 
-                            AvailableSeats[x,y,groupSize-1] = true;
+                    for (int groupSize = 1; groupSize <= 8; groupSize++)
+                    {
+                        if (upTo >= groupSize)
+                        {
+                            AvailableSeats[x, y, groupSize - 1] = true;
                         }
                     }
                 }
@@ -71,35 +87,23 @@ namespace Offline.Models
         }
 
 
-        public (int, int)[] GetLegalStartingPositions(int group_size){
-            var result = new List<(int,int)>();
+        public (int, int)[] GetLegalStartingPositions(int group_size)
+        {
+            var result = new List<(int, int)>();
             var seats = Seats;
 
-            for (int row = 0; row < Width; row ++){
-                for (int col = 0; col < Height; col ++){
-                    if (AvailableSeats[row,col,group_size]){
-                        result.Add((row,col));
+            for (int row = 0; row < Width; row++)
+            {
+                for (int col = 0; col < Height; col++)
+                {
+                    if (AvailableSeats[row, col, group_size])
+                    {
+                        result.Add((row, col));
                     }
                 }
 
             }
             return result.ToArray();
-        }
-
-        public double[] GetGroupsAsArray()
-        {
-            var result = new List<double>(TotalNumberOfGroups);
-
-            for (int i = 1; i < 9; i++)
-            {
-                for (int j = 0; j < Groups[i]; j++)
-                {
-                    result.Add(i);
-                }
-            }
-
-            return result.ToArray();
-            GroupSizes = GetGroupsAsArray();
         }
 
         public void SeatGroup(int startX, int startY, int groupSize)
@@ -191,6 +195,17 @@ namespace Offline.Models
             return seatedGroups;
         }
 
+        public int countSeated()
+        {
+            int res = 0;
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                    res += Seats[i, j] == 2 ? 1 : 0;
+            return res;
+        }
+
+        
+
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
@@ -225,10 +240,15 @@ namespace Offline.Models
 
             for (int i = 1; i < 9; i++)
             {
-                for (int j = 0; j < Groups[i]; j++)
+                if (Groups.ContainsKey(i))
                 {
-                    result.Add(i);
+                    for (int j = 0; j < Groups[i]; j++)
+                    {
+                        result.Add(i);
+                    }
+
                 }
+
             }
 
             return result.ToArray();

@@ -39,7 +39,7 @@ namespace Offline
 
                 Console.WriteLine(Cinema);
                 Console.WriteLine(Cinema.Verify());
-
+                Console.WriteLine("People seated:" + Cinema.countSeated() + " out of " + Cinema.TotalNumberOfPeople);
                 // Dispose of model and env
                 model.Dispose();
                 env.Dispose();
@@ -68,22 +68,28 @@ namespace Offline
                 {
                     if (g1 < g2)
                     {
-                        for (int x1 = 0; x1 < Cinema.Width; x1++)
+                        var size1 = Cinema.GroupSizes[g1];
+                        var size2 = Cinema.GroupSizes[g2];
+                        foreach (var pos1 in Cinema.LegalStartPositions[size1])
                         {
-                            for (int y1 = 0; y1 < Cinema.Height; y1++)
-                            {
+                            var x1 = pos1.Item1;
+                            var y1 = pos1.Item2;
+                        //for (int x1 = 0; x1 < Cinema.Width; x1++)
+                        //{
+                         //   for (int y1 = 0; y1 < Cinema.Height; y1++)
+                         //   {
                                 for (int x2 = 0; x2 < Cinema.Width; x2++)
                                 {
                                     for (int y2 = 0; y2 < Cinema.Height; y2++)
                                     {
-                                        if (Utils.AreTwoSeatedGroupsValid(x1, y1, x2, y2, Cinema.GroupSizes[g1], Cinema.GroupSizes[g2]) != Utils.SeatingResult.NoViolation)
+                                        if (Utils.AreTwoSeatedGroupsValid(x1, y1, x2, y2, size1, size2) != Utils.SeatingResult.NoViolation)
                                         {
                                             model.AddConstr(seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1, "Distance constaint");
                                         }
                                     }
                                 }
                             }
-                        }
+                       // }
                     }
                 }
             }
