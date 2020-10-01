@@ -11,11 +11,11 @@ namespace Offline.Models
         public int[,] Seats { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-
         public bool[,,] AvailableSeats { get; set; }
         public int TotalNumberOfGroups { get; set; }
         public int TotalNumberOfPeople { get; private set; }
         public int[] GroupSizes { get; set; }
+        private Dictionary<(int,int,int,int), (int,int)[]> InvalidSeatsMap { get; set; }
 
         public (int, int)[][] LegalStartPositions { get; private set; }
 
@@ -47,8 +47,8 @@ namespace Offline.Models
             {
                 LegalStartPositions[g] = GetLegalStartingPositions(g);
             }
-
-
+            
+            InvalidSeatsMap = new Dictionary<(int, int, int, int), (int, int)[]>();
         }
 
         public void CalculateAvailableSeats()
@@ -101,10 +101,51 @@ namespace Offline.Models
                         result.Add((row, col));
                     }
                 }
-
             }
             return result.ToArray();
         }
+
+        public (int, int)[] GetInvalidSeats(int startX, int startY, int size1, int size2)
+        {
+            var key = (startX, startY, size1, size2);
+
+            if (InvalidSeatsMap.ContainsKey(key))
+            {
+                return InvalidSeatsMap[key];
+            }
+
+            var result = new List<(int, int)>();
+            size1--;
+            size2--;
+
+
+            for (int x2 = (startX - size2 - 1); x2 < (startX + size1 + 2); x2++)
+            {
+                if (x2 >= 0 && x2 < Width)
+                {
+                    var above = startY + 1;
+
+                    if (above >= 0 && above < Height)
+                    {
+                        result.Add((x2, above));
+                    }
+
+                    var below = startY - 1;
+
+                    if (below >= 0)
+                    {
+                        result.Add((x2, below));
+                    }
+                }         
+            }
+
+            var resultAsArray = result.ToArray();
+
+            InvalidSeatsMap.Add(key, resultAsArray);
+
+            return resultAsArray;
+        }
+
 
         public void SeatGroup(int startX, int startY, int groupSize)
         {
