@@ -105,7 +105,7 @@ namespace Offline.Models
             return result.ToArray();
         }
 
-        public (int, int)[] GetInvalidSeats(int startX, int startY, int size1, int size2)
+       public (int, int)[] GetInvalidSeats(int startX, int startY, int size1, int size2)
         {
             var key = (startX, startY, size1, size2);
 
@@ -118,6 +118,13 @@ namespace Offline.Models
             size1--;
             size2--;
 
+            for (int x2 = (startX - size2 - 2); x2 < (startX + size1 + 3); x2++)
+            {
+                if (x2 >= 0 && x2 < Width)
+                {
+                    result.Add((x2, startY));
+                }
+            }
 
             for (int x2 = (startX - size2 - 1); x2 < (startX + size1 + 2); x2++)
             {

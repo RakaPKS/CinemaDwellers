@@ -36,7 +36,7 @@ namespace Offline.Models.Tests
         [TestMethod]
         public void CalculateAvailableSeatsTest()
         {
-            var expectedTrueAmount = 230;
+            var expectedTrueAmount = 228;
             var amount_of_trues =0;
             for (int i = 0 ; i < Cinema.AvailableSeats.GetLength(0); i ++){
                 for (int j = 0 ; j < Cinema.AvailableSeats.GetLength(1); j ++){
