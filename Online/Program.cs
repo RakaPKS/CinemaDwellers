@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading;
@@ -121,7 +122,7 @@ namespace newOnline
 
             ThreadPool.GetMaxThreads(out noThreads, out noPortThreads);
 
-            noThreads = Math.Min(noThreads, 8);// seatData[groupSize - 1].GetLength(1));
+            noThreads = Math.Min(noThreads, 16);// seatData[groupSize - 1].GetLength(1));
 
             var threads = new Thread[noThreads];
 
@@ -129,10 +130,11 @@ namespace newOnline
 
             for (int k = 0; k < noThreads; k++)
             {
-                threadResults[k] = ((-1, -1), int.MaxValue);
                 int index = k;
+                threadResults[index] = ((-1, -1), int.MaxValue);
+                
                 threads[k] = new Thread(() => {
-                    for (int j = (seatData[groupSize - 1].GetLength(1) / (noThreads)) * k ; j < (seatData[groupSize - 1].GetLength(1) / noThreads) * (k + 1) && j < seatData[groupSize - 1].GetLength(1); j++)
+                    for (int j = ((seatData[groupSize - 1].GetLength(1) / noThreads) + 1) * index ; j < ((seatData[groupSize - 1].GetLength(1) / noThreads) + 1) * (index + 1) && j < seatData[groupSize - 1].GetLength(1); j++)
                         for (int i = 0; i < seatData[groupSize - 1].GetLength(0); i++)
                         {
                             if (seatData[groupSize - 1][i, j] != -1 && seatData[groupSize - 1][i, j] < threadResults[index].Item2)
