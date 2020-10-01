@@ -14,6 +14,7 @@ namespace Offline.Models
 
         public bool[,,] AvailableSeats { get; set; }
         public int TotalNumberOfGroups { get; set; }
+        public int[] GroupSizes { get; set; }
 
         public (int, int)[][] LegalStartPositions { get; private set; }
 
@@ -98,6 +99,7 @@ namespace Offline.Models
             }
 
             return result.ToArray();
+            GroupSizes = GetGroupsAsArray();
         }
 
         public void SeatGroup(int startX, int startY, int groupSize)
@@ -216,5 +218,21 @@ namespace Offline.Models
 
             return builder.ToString();
         }
+
+        private int[] GetGroupsAsArray()
+        {
+            var result = new List<int>(TotalNumberOfGroups);
+
+            for (int i = 1; i < 9; i++)
+            {
+                for (int j = 0; j < Groups[i]; j++)
+                {
+                    result.Add(i);
+                }
+            }
+
+            return result.ToArray();
+        }
+
     }
 }

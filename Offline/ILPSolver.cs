@@ -10,13 +10,9 @@ namespace Offline
     {
         private Cinema Cinema { get; set; }
 
-        private double[] GroupSizes { get; set; }
-
         public ILPSolver(Cinema cinema)
         {
             Cinema = cinema;
-            GroupSizes = Cinema.GetGroupsAsArray();
-            
         }
 
         public void Solve()
@@ -80,7 +76,7 @@ namespace Offline
                                 {
                                     for (int y2 = 0; y2 < Cinema.Height; y2++)
                                     {
-                                        if (Utils.AreTwoSeatedGroupsValid(x1, y1, x2, y2, (int)GroupSizes[g1], (int)GroupSizes[g2]) != Utils.SeatingResult.NoViolation)
+                                        if (Utils.AreTwoSeatedGroupsValid(x1, y1, x2, y2, Cinema.GroupSizes[g1], Cinema.GroupSizes[g2]) != Utils.SeatingResult.NoViolation)
                                         {
                                             model.AddConstr(seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1, "Distance constaint");
                                         }
@@ -103,7 +99,7 @@ namespace Offline
                     {
                         var anyZeroes = false;
 
-                        for (int i = 0; i < (int)GroupSizes[g]; i++)
+                        for (int i = 0; i < Cinema.GroupSizes[g]; i++)
                         {
                             if (x + i >= Cinema.Width || Cinema.Seats[x + i, y] == 0)
                             {
@@ -131,7 +127,7 @@ namespace Offline
                 {
                     for (int g = 0; g < Cinema.TotalNumberOfGroups; g++)
                     {
-                        expr.AddTerm(GroupSizes[g], seated[x, y, g]);
+                        expr.AddTerm(Cinema.GroupSizes[g], seated[x, y, g]);
                     }
                 }
             }
@@ -192,7 +188,7 @@ namespace Offline
                     {
                         if (seated[x, y, g].X > 0)
                         {
-                            Cinema.SeatGroup(x, y, (int)GroupSizes[g]);
+                            Cinema.SeatGroup(x, y, Cinema.GroupSizes[g]);
                         }
                     }
                 }
