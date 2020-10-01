@@ -11,3 +11,8 @@ __pycache__/
 /CinemaGenerator2000/.vs/CinemaGenerator2000/v16
 /CinemaGenerator2000/cinema.txt
 /CinemaGenerator2000/cinema_online.txt
+
+/OfflineTests/bin/*
+/Offline/bin/*
+/OfflineTests/obj/*
+/Offline/obj/*
