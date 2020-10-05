@@ -4,53 +4,96 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Linq;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+
 namespace Offline
 {
     public class ILPSolver
     {
         private Cinema Cinema { get; set; }
 
-        public ILPSolver(Cinema cinema)
+        private SolverConfig Config { get; set; }
+
+        private string InstanceName { get; set; }
+
+        public ILPSolver(Cinema cinema, SolverConfig config, string instanceName)
         {
             Cinema = cinema;
+            Config = config;
+            InstanceName = instanceName;
         }
 
-        public void Solve()
+        public (Cinema, Dictionary<string, string>) Solve()
         {
+            var debug = true;
+
+            var times = new Dictionary<string, string>();
+
             try
             {
                 // Create an empty environment, set options and start
                 GRBEnv env = new GRBEnv(true);
-                env.Set("LogFile", "mip1.log");
+
+                env.Set(GRB.IntParam.MIPFocus, Config.MIPFocus);
+                env.Set(GRB.IntParam.AggFill, Config.AggFill);
+                env.Set(GRB.IntParam.Presolve, Config.Presolve);
+                env.Set(GRB.IntParam.Method, Config.Method);
+                env.Set(GRB.IntParam.SubMIPNodes, Config.SubMIPNodes);
+                env.Set(GRB.IntParam.PreSparsify, Config.PreSparsify);
+                env.Set(GRB.IntParam.PrePasses, Config.PrePasses);
+                env.Set(GRB.IntParam.MIRCuts, Config.MIRCuts);
+                env.Set(GRB.IntParam.Cuts, Config.Cuts);
+                env.Set(GRB.IntParam.FlowCoverCuts, Config.FlowCoverCuts);
+
+                if (!debug)
+                {
+                    env.Set(GRB.IntParam.OutputFlag, 0);
+                }
+
                 env.Start();
-                Console.WriteLine(Cinema);
 
                 // Create empty model
                 GRBModel model = new GRBModel(env);
 
-                var grbSeated = Utils.TimeFunction(() => AddSeatedBinaryVariables(model), "Add Decision Variables");
+                (var grbSeated, var addDecisionVariableTime) = Utils.TimeFunction(() => AddSeatedBinaryVariables(model), "Add Decision Variables");
 
-                Utils.TimeAction(() => AddContraints(model, grbSeated), "Add Constraints");
+                var addConstraintsTime = Utils.TimeAction(() => AddContraints(model, grbSeated), "Add Constraints");
 
-                Utils.TimeAction(() => AddObjective(model, grbSeated), "Add Objective");
+                var addObjectiveTime = Utils.TimeAction(() => AddObjective(model, grbSeated), "Add Objective");
 
-                Utils.TimeAction(() => model.Optimize(), "Optimizing");
+                var optimizeTime = Utils.TimeAction(() => model.Optimize(), "Optimizing");
+
+                if (Config.Tune == 1)
+                {
+                    model.Tune();
+
+                    for (int i = 0; i < model.TuneResultCount; i++)
+                    {
+                        model.GetTuneResult(i);
+                        model.Write(@$"../../../tune_results/tune_{InstanceName}_" + i.ToString() + ".prm");
+                    }
+                }
 
                 SeatGroups(grbSeated);
-
-                Console.WriteLine(Cinema);
-                Console.WriteLine(Cinema.Verify());
-                Console.WriteLine("People seated:" + Cinema.countSeated() + " out of " + Cinema.TotalNumberOfPeople);
 
                 // Dispose of model and env
                 model.Dispose();
                 env.Dispose();
 
+                times.Add("Add Decision Variables", addDecisionVariableTime);
+                times.Add("Add Constraints", addConstraintsTime);
+                times.Add("Add Objective", addObjectiveTime);
+                times.Add("Optimizing", optimizeTime);
             }
             catch (GRBException e)
             {
                 Console.WriteLine("Error code: " + e.ErrorCode + ". " + e.Message);
+                throw e;
             }
+
+            return (Cinema, times);
         }
 
         private void AddContraints(GRBModel model, GRBVar[,,] seated)
@@ -59,7 +102,7 @@ namespace Offline
 
             AddDoNotSeatOutOfBoundsConstraint(model, seated);
 
-            AddDistanceConstraints(model, seated);
+            AddDistanceConstraintsParallel(model, seated);
         }
 
         private void AddDistanceConstraints(GRBModel model, GRBVar[,,] seated)
@@ -94,6 +137,50 @@ namespace Offline
                         }
                     }
                 }
+            }
+        }
+
+        private void AddDistanceConstraintsParallel(GRBModel model, GRBVar[,,] seated)
+        {
+            ConcurrentBag<GRBLinExpr> constraints = new ConcurrentBag<GRBLinExpr>();
+
+            Parallel.For(0, Cinema.TotalNumberOfGroups, g1 =>
+            {
+                {
+                    for (int g2 = 0; g2 < Cinema.TotalNumberOfGroups; g2++)
+                    {
+                        if (g1 < g2)
+                        {
+                            var size1 = Cinema.GroupSizes[g1];
+                            var size2 = Cinema.GroupSizes[g2];
+                            // Loop over all legal start positions for group 1 
+                            foreach (var pos1 in Cinema.LegalStartPositions[size1 - 1])
+                            {
+                                var x1 = pos1.Item1;
+                                var y1 = pos1.Item2;
+
+                                // Collect invalid seats 
+                                var invalidSeats = Cinema.GetInvalidSeats(x1, y1, size1, size2);
+                                foreach (var pos2 in invalidSeats)
+                                {
+                                    if (Cinema.LegalStartPositions[size2 - 1].Any(m => m == pos2))
+                                    {
+                                        var x2 = pos2.Item1;
+                                        var y2 = pos2.Item2;
+
+                                        constraints.Add(new GRBLinExpr(seated[x1, y1, g1] + seated[x2, y2, g2]));
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            });
+
+            foreach(var constraint in constraints)
+            {
+                model.AddConstr(constraint, GRB.LESS_EQUAL, 1, "Distance constaint");
             }
         }
 

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Offline.Models; 
 
@@ -28,6 +30,7 @@ namespace Offline
             DiagnolViolation = 3,
             NoViolation = 4
         }
+
         public static SeatingResult AreTwoSeatedGroupsValid(int x1, int y1, int x2, int y2, int s1, int s2)
         {
             if (x1 == x2 && y1 == y2)
@@ -80,7 +83,7 @@ namespace Offline
             return SeatingResult.NoViolation;
         }
 
-        public static void TimeAction(Action action, string actionName)
+        public static string TimeAction(Action action, string actionName)
         {
             var timer = new Stopwatch();
             timer.Start();
@@ -93,10 +96,10 @@ namespace Offline
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);
 
-            Console.WriteLine($"RunTime for {actionName}" + elapsedTime);
+            return elapsedTime;
         }
 
-        public static T TimeFunction<T>(Func<T> func, string functionName)
+        public static (T, string) TimeFunction<T>(Func<T> func, string functionName)
         {
             var timer = new Stopwatch();
             timer.Start();
@@ -109,9 +112,21 @@ namespace Offline
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);
 
-            Console.WriteLine($"RunTime for {functionName}: " + elapsedTime);
+            return (result, elapsedTime);
+        }
 
-            return result;
+        public static T[] GetColumn<T>(T[,] matrix, int columnNumber)
+        {
+            return Enumerable.Range(0, matrix.GetLength(0))
+                    .Select(x => matrix[x, columnNumber])
+                    .ToArray();
+        }
+
+        public static T[] GetRow<T>(T[,] matrix, int rowNumber)
+        {
+            return Enumerable.Range(0, matrix.GetLength(1))
+                    .Select(x => matrix[rowNumber, x])
+                    .ToArray();
         }
     }
 }
