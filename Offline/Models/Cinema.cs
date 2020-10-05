@@ -46,8 +46,6 @@ namespace Offline.Models
             {
                 LegalStartPositions[g] = GetLegalStartingPositions(g);
             }
-
-            InvalidSeatsMap = new Dictionary<(int, int, int, int), (int, int)[]>();
         }
 
         public void CalculateAvailableSeats()

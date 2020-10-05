@@ -48,11 +48,17 @@ namespace Offline
             for (int i = 1; i <= numberOfInstances; i++)
             {
                 var configName = $"config{i}";
-                var instanceName = $"instance{i}";
+                var instanceName = $"Exact{i}";
 
                 Console.WriteLine($"Solving {instanceName}");
 
-                var config = SolverConfig.Parse(configFolder + configName + ".txt");
+                var config = SolverConfig.Parse(configFolder + "config_default" + ".txt"); ;
+
+                if (File.Exists(configFolder + configName + ".txt"))
+                {
+                    config = SolverConfig.Parse(configFolder + configName + ".txt");
+                }
+
                 var cinema = CinemaReader.Read(instanceFolder + instanceName + ".txt");
 
                 var solver = new ILPSolver(cinema, config, instanceName);
