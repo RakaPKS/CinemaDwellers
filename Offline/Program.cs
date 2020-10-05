@@ -14,7 +14,8 @@ namespace Offline
     {
         static void Main(string[] args)
         {
-            var debug = false;
+            var debug = true;
+            var runAllInstances = false;
 
             var instanceFolder = Path.GetFullPath(@"../../../instances/");
             var configFolder = Path.GetFullPath(@"../../../configs/");
@@ -45,10 +46,66 @@ namespace Offline
 
             var records = new List<SolveResult>();
 
-            for (int i = 1; i <= numberOfInstances; i++)
+            if (runAllInstances)
             {
-                var configName = $"config{i}";
-                var instanceName = $"Exact{i}";
+                for (int i = 1; i <= numberOfInstances; i++)
+                {
+                    var configName = $"config{i}";
+                    var instanceName = $"Exact{i}";
+
+                    Console.WriteLine($"Solving {instanceName}");
+
+                    var config = SolverConfig.Parse(configFolder + "config_default" + ".txt"); ;
+
+                    if (File.Exists(configFolder + configName + ".txt"))
+                    {
+                        config = SolverConfig.Parse(configFolder + configName + ".txt");
+                    }
+
+                    var cinema = CinemaReader.Read(instanceFolder + instanceName + ".txt");
+
+                    var solver = new ILPSolver(cinema, config, instanceName);
+
+                    if (debug)
+                    {
+                        Console.WriteLine(cinema);
+                    }
+
+                    (var seatedCinema, var times) = solver.Solve();
+
+                    if (debug)
+                    {
+                        Console.WriteLine(seatedCinema);
+                        Console.WriteLine("People seated:" + seatedCinema.countSeated() + " out of " + seatedCinema.TotalNumberOfPeople);
+                        Console.WriteLine($"Valid cinema:{seatedCinema.Verify()}");
+
+                        Console.WriteLine("Times:");
+
+                        foreach (var time in times)
+                        {
+                            Console.WriteLine($"RunTime for {time.Key}: " + time.Value);
+                        }
+                    }
+
+                    var record = new SolveResult(instanceName, configName, seatedCinema.Verify(),
+                        seatedCinema.countSeated(), seatedCinema.TotalNumberOfPeople,
+                        times["Add Constraints"], times["Optimizing"]);
+
+                    records.Add(record);
+
+                    Console.WriteLine($"Done!");
+                }
+
+                using (var writer = new StreamWriter($"{resultFolder}result_{DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss")}.csv"))
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    csv.WriteRecords(records);
+                }
+            }
+            else
+            {
+                var configName = $"config1";
+                var instanceName = $"Exact11";
 
                 Console.WriteLine($"Solving {instanceName}");
 
@@ -83,21 +140,9 @@ namespace Offline
                         Console.WriteLine($"RunTime for {time.Key}: " + time.Value);
                     }
                 }
-
-                var record = new SolveResult(instanceName, configName, seatedCinema.Verify(),
-                    seatedCinema.countSeated(), seatedCinema.TotalNumberOfPeople,
-                    times["Add Constraints"], times["Optimizing"]);
-
-                records.Add(record);
-
-                Console.WriteLine($"Done!");
             }
 
-            using (var writer = new StreamWriter($"{resultFolder}result_{DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss")}.csv"))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-            {
-                csv.WriteRecords(records);
-            }
+
         }
 
     }
