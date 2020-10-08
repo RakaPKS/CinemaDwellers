@@ -71,7 +71,23 @@ namespace Offline
                         Console.WriteLine(cinema);
                     }
 
-                    (var seatedCinema, var times) = solver.Solve();
+                    Cinema seatedCinema = null;
+                    Dictionary<string, string> times = null;
+
+                    try
+                    {
+                        (seatedCinema, times) = solver.Solve();
+                    }
+                    catch (Exception e)
+                    {
+                        using (var writer = new StreamWriter($"{resultFolder}result_{DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss")}.csv"))
+                        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                        {
+                            csv.WriteRecords(records);
+                        }
+
+                        throw e;
+                    }
 
                     if (debug)
                     {
