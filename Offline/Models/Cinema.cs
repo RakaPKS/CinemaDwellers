@@ -16,7 +16,6 @@ namespace Offline.Models
         public int TotalNumberOfGroups { get; set; }
         public int TotalNumberOfPeople { get; private set; }
         public int[] GroupSizes { get; set; }
-        private Dictionary<(int, int, int, int), (int, int)[]> InvalidSeatsMap { get; set; }
 
         public (int, int)[][] LegalStartPositions { get; private set; }
 
@@ -48,8 +47,6 @@ namespace Offline.Models
             {
                 LegalStartPositions[g] = GetLegalStartingPositions(g);
             }
-
-            InvalidSeatsMap = new Dictionary<(int, int, int, int), (int, int)[]>();
         }
 
         public void CalculateAvailableSeats()
@@ -59,10 +56,6 @@ namespace Offline.Models
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    if (x == 0 & y == 1)
-                    {
-                        Debug.WriteLine("Debug time");
-                    }
                     // Store how many available we seats we have starting from this point
                     // Default is 7 (max groups)
                     int upTo = 7;
@@ -109,13 +102,6 @@ namespace Offline.Models
 
         public (int, int)[] GetInvalidSeats(int startX, int startY, int size1, int size2)
         {
-            var key = (startX, startY, size1, size2);
-
-            if (InvalidSeatsMap.ContainsKey(key))
-            {
-                return InvalidSeatsMap[key];
-            }
-
             var result = new List<(int, int)>();
             size1--;
             size2--;
@@ -149,8 +135,6 @@ namespace Offline.Models
             }
 
             var resultAsArray = result.ToArray();
-
-            InvalidSeatsMap.Add(key, resultAsArray);
 
             return resultAsArray;
         }
@@ -253,7 +237,6 @@ namespace Offline.Models
                     res += Seats[i, j] == 2 ? 1 : 0;
             return res;
         }
-
 
 
         public override string ToString()
