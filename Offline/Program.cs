@@ -22,7 +22,7 @@ namespace Offline
             var resultFolder = Path.GetFullPath(@"../../../results/");
             var tuneResultFolder = Path.GetFullPath(@"../../../tune_results/");
 
-            var numberOfInstances = Directory.GetFiles(instanceFolder).Length;
+            
 
             if (!Directory.Exists(instanceFolder))
             {
@@ -43,7 +43,7 @@ namespace Offline
             {
                 Directory.CreateDirectory(tuneResultFolder);
             }
-
+            var numberOfInstances = Directory.GetFiles(instanceFolder).Length;
             var records = new List<SolveResult>();
 
             if (runAllInstances)
@@ -104,8 +104,8 @@ namespace Offline
             }
             else
             {
-                var configName = $"config1";
-                var instanceName = $"Exact11";
+                var configName = $"config2";
+                var instanceName = $"Exact2";
 
                 Console.WriteLine($"Solving {instanceName}");
 
