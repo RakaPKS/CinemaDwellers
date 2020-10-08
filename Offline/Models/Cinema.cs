@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 using System.Text;
 
 namespace Offline.Models
@@ -60,7 +61,7 @@ namespace Offline.Models
                 {
                     if (x == 0 & y == 1)
                     {
-                        Console.WriteLine("Debug time");
+                        Debug.WriteLine("Debug time");
                     }
                     // Store how many available we seats we have starting from this point
                     // Default is 7 (max groups)
