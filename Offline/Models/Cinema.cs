@@ -43,12 +43,18 @@ namespace Offline.Models
 
             // Initialize legal start positions for each possible group size 
             LegalStartPositions = new (int, int)[8][];
+            UpdateLegalStartPositions();
+        }
+
+        public void UpdateLegalStartPositions()
+        {
+            LegalStartPositions = new (int, int)[8][];
             for (int g = 0; g < 8; g++)
             {
                 LegalStartPositions[g] = GetLegalStartingPositions(g);
             }
-        }
 
+        }
         public void CalculateAvailableSeats()
         {
             AvailableSeats = new bool[Width, Height, 8];
@@ -61,7 +67,7 @@ namespace Offline.Models
                     int upTo = 7;
                     for (int i = 0; i < 8; i++)
                     {
-                        if (x + i >= Width || Seats[x + i, y] == 0)
+                        if (x + i >= Width || Seats[x + i, y] != 1)
                         {
                             // If upto=0 i cannot seat anyone
                             // If upto=1 i can seat a group of 1 
@@ -80,6 +86,7 @@ namespace Offline.Models
                 }
             }
         }
+
 
 
         public (int, int)[] GetLegalStartingPositions(int group_size)
@@ -139,7 +146,35 @@ namespace Offline.Models
             return resultAsArray;
         }
 
+        public int CountBad(int startX, int startY, int groupSize, bool update = false)
+        {
+            int result = 0;
+            for (int x = startX - 2; x <= startX + (groupSize - 1) + 2; x++)
+            {
+                if (x < 0 || x >= Width) continue;
+                if (update) { Seats[x, startY] = 0; }
+                else { if (Seats[x, startY] == 1) result++; }
+            }
+            for (int x = startX - 1; x <= startX + (groupSize - 1) + 1; x++)
+            {
+                if (x < 0 || x >= Width) continue;
+                for (int y = startY - 1; y <= startY + 1; y++)
+                {
+                    if (y == startY) continue;
+                    if (y < 0 || y >= Height) continue;
+                    if (update) { Seats[x, y] = 0; }
+                    else { if (Seats[x, y] == 1) result++; }
+                }
+            }
+            for (int x = startX; x <= startX + (groupSize - 1); x++)
+            {
+                if (update) Seats[x, startY] = 2;
 
+            }
+
+            return result;
+
+        }
         public void SeatGroup(int startX, int startY, int groupSize)
         {
             for (int x = startX; x <= startX + (groupSize - 1); x++)
@@ -148,9 +183,9 @@ namespace Offline.Models
                 {
                     Seats[x, startY] = 2;
                 }
-                else if (Seats[x, startY] == 0)
+                else if (Seats[x, startY] != 1)
                 {
-                    throw new Exception("Cannot seat a group at a 0 position");
+                    throw new Exception("Cannot seat a group at a 0 or 2 position");
                 }
             }
         }

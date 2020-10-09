@@ -25,7 +25,7 @@ namespace Offline
             InstanceName = instanceName;
         }
 
-        public (Cinema, Dictionary<string, string>) Solve()
+        public (Cinema, Dictionary<string, string>) Solve(string paramFile)
         {
             var debug = true;
 
@@ -36,16 +36,8 @@ namespace Offline
                 // Create an empty environment, set options and start
                 GRBEnv env = new GRBEnv(true);
 
-                env.Set(GRB.IntParam.MIPFocus, Config.MIPFocus);
-                env.Set(GRB.IntParam.AggFill, Config.AggFill);
-                env.Set(GRB.IntParam.Presolve, Config.Presolve);
-                env.Set(GRB.IntParam.Method, Config.Method);
-                env.Set(GRB.IntParam.SubMIPNodes, Config.SubMIPNodes);
-                env.Set(GRB.IntParam.PreSparsify, Config.PreSparsify);
-                env.Set(GRB.IntParam.PrePasses, Config.PrePasses);
-                env.Set(GRB.IntParam.MIRCuts, Config.MIRCuts);
-                env.Set(GRB.IntParam.Cuts, Config.Cuts);
-                env.Set(GRB.IntParam.FlowCoverCuts, Config.FlowCoverCuts);
+                // Use gurobi's parameter reader to load the best file
+                env.ReadParams(paramFile);
 
                 if (!debug)
                 {
@@ -65,7 +57,7 @@ namespace Offline
 
                 var optimizeTime = Utils.TimeAction(() => model.Optimize(), "Optimizing");
 
-                if (Config.Tune == 1)
+                if (false && Config.Tune == 1)
                 {
                     model.Tune();
 
