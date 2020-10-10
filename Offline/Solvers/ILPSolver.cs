@@ -14,78 +14,75 @@ namespace Offline
     {
         private Cinema Cinema { get; set; }
 
-        private SolverConfig Config { get; set; }
-
-        private string InstanceName { get; set; }
-
-        public ILPSolver(Cinema cinema, SolverConfig config, string instanceName)
+        public ILPSolver(Cinema cinema)
         {
             Cinema = cinema;
-            Config = config;
-            InstanceName = instanceName;
         }
 
-        public (Cinema, Dictionary<string, string>) Solve(string paramFile)
+        public Dictionary<string, string> Solve(bool tune, bool debug, string tuneOutputFile = null, string paramFile = null)
         {
-            var debug = true;
-
             var times = new Dictionary<string, string>();
 
-            try
+            var totalTime = Utils.TimeAction(() =>
             {
-                // Create an empty environment, set options and start
-                GRBEnv env = new GRBEnv(true);
-
-                // Use gurobi's parameter reader to load the best file
-                env.ReadParams(paramFile);
-
-                if (!debug)
+                try
                 {
-                    env.Set(GRB.IntParam.OutputFlag, 0);
-                }
+                    // Create an empty environment, set options and start
+                    GRBEnv env = new GRBEnv(true);
 
-                env.Start();
-
-                // Create empty model
-                GRBModel model = new GRBModel(env);
-
-                (var grbSeated, var addDecisionVariableTime) = Utils.TimeFunction(() => AddSeatedBinaryVariables(model), "Add Decision Variables");
-
-                var addConstraintsTime = Utils.TimeAction(() => AddContraints(model, grbSeated), "Add Constraints");
-
-                var addObjectiveTime = Utils.TimeAction(() => AddObjective(model, grbSeated), "Add Objective");
-
-                var optimizeTime = Utils.TimeAction(() => model.Optimize(), "Optimizing");
-
-                if (false && Config.Tune == 1)
-                {
-                    model.Tune();
-
-                    for (int i = 0; i < model.TuneResultCount; i++)
+                    // Use gurobi's parameter reader to load the best file
+                    if (paramFile != null)
                     {
-                        model.GetTuneResult(i);
-                        model.Write(@$"../../../tune_results/tune_{InstanceName}_" + i.ToString() + ".prm");
+                        env.ReadParams(paramFile);
                     }
+
+                    if (!debug)
+                    {
+                        env.Set(GRB.IntParam.OutputFlag, 0);
+                    }
+
+                    env.Start();
+
+                    // Create empty model
+                    GRBModel model = new GRBModel(env);
+
+                    (var grbSeated, var addDecisionVariableTime) = Utils.TimeFunction(() => AddSeatedBinaryVariables(model), "Add Decision Variables");
+
+                    var addConstraintsTime = Utils.TimeAction(() => AddContraints(model, grbSeated), "Add Constraints");
+
+                    var addObjectiveTime = Utils.TimeAction(() => AddObjective(model, grbSeated), "Add Objective");
+
+                    var optimizeTime = Utils.TimeAction(() => model.Optimize(), "Optimizing");
+
+                    if (tune)
+                    {
+                        model.Tune();
+
+                        model.GetTuneResult(0);
+                        model.Write(tuneOutputFile);
+                    }
+
+                    SeatGroups(grbSeated);
+
+                    // Dispose of model and env
+                    model.Dispose();
+                    env.Dispose();
+
+                    times.Add("Add Decision Variables", addDecisionVariableTime);
+                    times.Add("Add Constraints", addConstraintsTime);
+                    times.Add("Add Objective", addObjectiveTime);
+                    times.Add("Optimizing", optimizeTime);
                 }
+                catch (GRBException e)
+                {
+                    Console.WriteLine("Error code: " + e.ErrorCode + ". " + e.Message);
+                    throw e;
+                }
+            }, "Total");
 
-                SeatGroups(grbSeated);
+            times.Add("Total", totalTime);
 
-                // Dispose of model and env
-                model.Dispose();
-                env.Dispose();
-
-                times.Add("Add Decision Variables", addDecisionVariableTime);
-                times.Add("Add Constraints", addConstraintsTime);
-                times.Add("Add Objective", addObjectiveTime);
-                times.Add("Optimizing", optimizeTime);
-            }
-            catch (GRBException e)
-            {
-                Console.WriteLine("Error code: " + e.ErrorCode + ". " + e.Message);
-                throw e;
-            }
-
-            return (Cinema, times);
+            return times;
         }
 
         private void AddContraints(GRBModel model, GRBVar[,,] seated)
@@ -170,7 +167,7 @@ namespace Offline
                 }
             });
 
-            foreach(var constraint in constraints)
+            foreach (var constraint in constraints)
             {
                 model.AddConstr(constraint, GRB.LESS_EQUAL, 1, "Distance constaint");
             }

@@ -16,7 +16,6 @@ namespace Offline.Models
         public int TotalNumberOfGroups { get; set; }
         public int TotalNumberOfPeople { get; private set; }
         public int[] GroupSizes { get; set; }
-
         public (int, int)[][] LegalStartPositions { get; private set; }
 
         public Cinema(Dictionary<int, int> groups, int[,] seats, int width, int height)
@@ -284,7 +283,7 @@ namespace Offline.Models
             return seatedGroups;
         }
 
-        public int countSeated()
+        public int CountSeated()
         {
             int res = 0;
             for (int i = 0; i < Width; i++)
