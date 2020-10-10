@@ -31,14 +31,29 @@ namespace Offline.Models
             // Filter groups that don't fit as pre-processing step 
             foreach (var g in groups)
             {
-                if (GetLegalStartingPositions(g.Key - 1).Length > 0)
+                var amount_of_legal = GetLegalStartingPositions(g.Key - 1).Length;
+                // Any group that does not fit does not need to be added to the ILP
+                if (amount_of_legal > 0)
                 {
-                    Groups[g.Key] = g.Value;
+                    
+                    if (g.Value <= amount_of_legal)
+                    {
+                        Groups[g.Key] = g.Value;
+                    }
+                    // If there are 10 groups of 8, but only 1 possible start position for a group of 8,
+                    // cap the amount of groups of size 8 to 1. Less variables in the ILP!
+                    else
+                    {
+                        Groups[g.Key] = amount_of_legal;
+                    }
                 }
             }
 
             TotalNumberOfGroups = Groups.Sum(kv => kv.Value);
             GroupSizes = GetGroupsAsArray();
+
+            // TODO: Use this as an upper bound for the greedy algorithm
+            // Note that this should be done after the pre-processing step above
             TotalNumberOfPeople = GroupSizes.Sum();
 
             // Initialize legal start positions for each possible group size 

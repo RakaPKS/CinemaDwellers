@@ -46,6 +46,10 @@ namespace Offline
                                 best_pos = pos; 
                             }
                         }
+
+                        if (amt == 0){
+                            break;
+                        }
                     }
                     if (best_pos.Item1 > -1)
                     {
