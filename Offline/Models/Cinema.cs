@@ -31,7 +31,9 @@ namespace Offline.Models
             // Filter groups that don't fit as pre-processing step 
             foreach (var g in groups)
             {
-                var amount_of_legal = GetLegalStartingPositions(g.Key - 1).Length;
+                var legal = GetLegalStartingPositions(g.Key - 1); 
+                
+                var amount_of_legal = legal.Length;
                 // Any group that does not fit does not need to be added to the ILP
                 if (amount_of_legal > 0)
                 {
@@ -51,7 +53,9 @@ namespace Offline.Models
 
             TotalNumberOfGroups = Groups.Sum(kv => kv.Value);
             GroupSizes = GetGroupsAsArray();
-
+            foreach (var g in GroupSizes){
+                Console.WriteLine("A group " + g);
+            }
             // TODO: Use this as an upper bound for the greedy algorithm
             // Note that this should be done after the pre-processing step above
             TotalNumberOfPeople = GroupSizes.Sum();
@@ -79,7 +83,8 @@ namespace Offline.Models
                 {
                     // Store how many available we seats we have starting from this point
                     // Default is 7 (max groups)
-                    int upTo = 7;
+                    // No stupid, default is 8 (max groups)
+                    int upTo = 8;
                     for (int i = 0; i < 8; i++)
                     {
                         if (x + i >= Width || Seats[x + i, y] != 1)
