@@ -8,6 +8,10 @@ namespace newOnline
 {
     class Program
     {
+        /// <summary>
+        /// Entry point of the program.
+        /// </summary>
+        /// <param name="args">Arguments. Unused.</param>
         static void Main(string[] args)
         {
             // Our program uses multi-threading, which is incredibly slow in the debug mode of Visual Studio.
@@ -81,6 +85,11 @@ namespace newOnline
         public int[,] cinema;
         public List<int> people;
 
+        /// <summary>
+        /// Initialize class data.
+        /// </summary>
+        /// <param name="cinema">2d matrix of the cinema.</param>
+        /// <param name="people">People to seat in the cinema.</param>
         public Solver(int[,] cinema, List<int> people)
         {
             this.cinema = cinema;
@@ -92,6 +101,7 @@ namespace newOnline
         /// </summary>
         public void Solve()
         {
+            // Initialize a matrix containing all the possible seating costs, so we can modify it, instead of having to recalculate it every time.
             var seatData = initializeSeatData(cinema, cinema.GetLength(0), cinema.GetLength(1));
 
             for (int i = 0; i < people.Count; i++)
@@ -158,7 +168,7 @@ namespace newOnline
         /// <param name="x">X location of seated group.</param>
         /// <param name="y">Y location of seated group.</param>
         /// <param name="groupSize">Size of seated group.</param>
-        /// <returns>Returns how many seats will be disabled if we place the group here.</returns>
+        /// <returns>Returns how many seats will be disabled if we place the group here. Returns -1 if the group does not fit.</returns>
         private int countDisabledSeats(int[,] cinema, int x, int y, int groupSize)
         {
             int result = 0;
@@ -204,7 +214,7 @@ namespace newOnline
         /// <returns>(x,y) tuple of where the place the group. If the tuple is (-1, -1), the group cannot be seated.</returns>
         private (int, int) findBestPos(int[][,] seatData, int groupSize)
         {
-
+            // setting up multi-threading
             int noThreads, noPortThreads;
 
             ThreadPool.GetMaxThreads(out noThreads, out noPortThreads);
@@ -215,6 +225,7 @@ namespace newOnline
 
             var threadResults = new ((int, int), int)[noThreads];
 
+            // create the threads
             for (int k = 0; k < noThreads; k++)
             {
                 int index = k;
@@ -232,16 +243,19 @@ namespace newOnline
                 });
             }
 
+            // run the threads
             for (int k = 0; k < noThreads; k++)
             {
                 threads[k].Start();
             }
 
+            // wait for the threads to finish
             for (int k = 0; k < noThreads; k++)
             {
                 threads[k].Join();
             }
 
+            // join the results to find the best value of the matrix.
             (var result, var value) = ((-1, -1), int.MaxValue);
 
             for (int i = 0; i < noThreads; i++)
@@ -266,10 +280,10 @@ namespace newOnline
         /// <param name="groupSize">Size of group to place.</param>
         private void placeGroup(int[,] cinema, int x, int y, int groupSize)
         {
+            // disable all the seats around the group
             for (int i = -1; i < groupSize + 1; i++)
                 for (int j = -1; j < 2; j++)
                     if (inRange(cinema, x + i, y + j))
-
                         cinema[x + i, y + j] = 0;
 
             if (inRange(cinema, x - 2, y))
@@ -278,6 +292,7 @@ namespace newOnline
             if (inRange(cinema, x + groupSize + 1, y))
                 cinema[x + groupSize + 1, y] = 0;
 
+            // place the group
             for (int i = 0; i < groupSize; i++)
                 if (inRange(cinema, x + i, y))
                     cinema[x + i, y] = 2;
@@ -309,6 +324,7 @@ namespace newOnline
             {
                 for (int i = 0; i < cinema.GetLength(0); i++)
                 {
+                    // make sure all entries are the same length, for a pretty cinema
                     if (cinema[i, j] == -1)
                         res += " -1";
                     else if (cinema[i, j] >= 10)
