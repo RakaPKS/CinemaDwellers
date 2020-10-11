@@ -39,9 +39,81 @@ namespace Offline.Runners
                 else if (experimentId == 3)
                 {
                     RunTuning();
-                } else if (experimentId == 4)
+                }
+                else if (experimentId == 4)
                 {
                     RunNormalSolver();
+                }
+                else if (experimentId == 5)
+                {
+                    RunTryGreedyFirst();
+                }
+            }
+        }
+
+        private void RunTryGreedyFirst()
+        {
+            var resultsFile = $"{ResultsFolder}greedy_first_{DateTime.Now.ToString("yyyy-dd-M-HH-mm-ss")}.csv";
+
+            using (var writer = new StreamWriter(resultsFile))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                csv.WriteHeader(typeof(TryGreedyFirstResult));
+                csv.NextRecord();
+            }
+
+            for (int i = 1; i <= NumberOfInstances; i++)
+            {
+                using (var stream = File.Open(resultsFile, FileMode.Append))
+                using (var writer = new StreamWriter(stream))
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    csv.Configuration.HasHeaderRecord = false;
+
+                    var instanceFile = $"{InstancesFolder}/Exact{i}.txt";
+                    var configFile = $"{ConfigsFolder}tune_Exact{i}_0.prm";
+
+                    var cinema = CinemaReader.Read(instanceFile);
+
+                    var greedyCinema = CinemaReader.Read(instanceFile);
+                    var greedySolver = new GreedySolver(greedyCinema);
+
+                    var totalTime = Utils.TimeAction(() =>
+                    {
+                        var times = greedySolver.Solve();
+
+                        if (cinema.TotalNumberOfPeople != greedyCinema.CountSeated())
+                        {
+                            var ilpCinema = CinemaReader.Read(instanceFile);
+                            var ilpSolver = new ILPSolver(ilpCinema);
+
+                            times = ilpSolver.Solve(Options.Tune, Options.Debug, Options.TuneOutputFile, configFile);
+
+                            cinema = ilpCinema;
+                        }
+                        else
+                        {
+                            cinema = greedyCinema;
+                        }
+                    }, "Time");
+
+                    var result = new TryGreedyFirstResult
+                    {
+                        InstanceFile = instanceFile,
+                        ConfigFile = configFile,
+
+                        TotalNumberOfGroups = cinema.TotalNumberOfGroups,
+                        TotalNumberOfPeople = cinema.TotalNumberOfPeople,
+
+                        TotalTime = totalTime,
+
+                        Seated = cinema.CountSeated(),
+                        Valid = cinema.Verify(),
+                        Capacity = cinema.InitialCapacity
+                    };
+
+                    csv.WriteRecord(result);
+                    csv.NextRecord();
                 }
             }
         }
@@ -83,9 +155,10 @@ namespace Offline.Runners
 
                         OptimizationTime = times["Optimizing"],
                         ConstraintTime = times["Add Constraints"],
-                       
+
                         Seated = cinema.CountSeated(),
-                        Valid = cinema.Verify()
+                        Valid = cinema.Verify(),
+                        Capacity = cinema.InitialCapacity
                     };
 
                     csv.WriteRecord(result);
@@ -193,7 +266,9 @@ namespace Offline.Runners
                         SeatedILP = cinemaILP.CountSeated(),
 
                         ValidGreedy = cinemaGreedy.Verify(),
-                        ValidILP = cinemaILP.Verify()
+                        ValidILP = cinemaILP.Verify(),
+
+                        Capacity = cinemaGreedy.InitialCapacity
                     };
 
                     csv.WriteRecord(result);
@@ -242,7 +317,7 @@ namespace Offline.Runners
 
         public int SeatedTuned { get; set; }
         public int SeatedNotTuned { get; set; }
-        public int TotalNumberOfPeople { get; internal set; }
+        public int TotalNumberOfPeople { get; set; }
     }
 
     public class GreedyVsILPResult
@@ -260,6 +335,8 @@ namespace Offline.Runners
 
         public int SeatedILP { get; set; }
         public int SeatedGreedy { get; set; }
+
+        public int Capacity { get; set; }
 
     }
 
@@ -280,5 +357,26 @@ namespace Offline.Runners
         public bool Valid { get; set; }
 
         public int Seated { get; set; }
+
+        public int Capacity { get; set; }
+    }
+
+    public class TryGreedyFirstResult
+    {
+        public string InstanceFile { get; set; }
+
+        public string ConfigFile { get; set; }
+
+        public string TotalTime { get; set; }
+
+        public int TotalNumberOfGroups { get; set; }
+
+        public int TotalNumberOfPeople { get; set; }
+
+        public bool Valid { get; set; }
+
+        public int Seated { get; set; }
+
+        public int Capacity { get; set; }
     }
 }

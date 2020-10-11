@@ -18,6 +18,8 @@ namespace Offline.Models
         public int[] GroupSizes { get; set; }
         public (int, int)[][] LegalStartPositions { get; private set; }
 
+        public int InitialCapacity { get; set; }
+
         public Cinema(Dictionary<int, int> groups, int[,] seats, int width, int height)
         {
             Seats = seats;
@@ -59,6 +61,8 @@ namespace Offline.Models
             // Initialize legal start positions for each possible group size 
             LegalStartPositions = new (int, int)[8][];
             UpdateLegalStartPositions();
+
+            InitialCapacity = Capacity();
         }
 
         public void UpdateLegalStartPositions()
@@ -286,6 +290,15 @@ namespace Offline.Models
             for (int i = 0; i < Width; i++)
                 for (int j = 0; j < Height; j++)
                     res += Seats[i, j] == 2 ? 1 : 0;
+            return res;
+        }
+
+        public int Capacity()
+        {
+            int res = 0;
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                    res += Seats[i, j] == 1 ? 1 : 0;
             return res;
         }
 
