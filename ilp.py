@@ -7,7 +7,10 @@ import numpy as np
 from tqdm import tqdm
 import gurobipy as gp
 from gurobipy import GRB
-from collections import defaultdict 
+from collections import defaultdict
+import os
+import csv
+from datetime import datetime
 
 from seating import Seating
 from utils import (
@@ -20,8 +23,7 @@ from utils import (
     filter_people,
 )
 
-
-def make_and_solve_ILP(filename, optimized=False):
+def make_and_solve_ILP(filename, optimized=False, configFile=""):
     """
     Encodes and solves ILP
     """
@@ -61,7 +63,9 @@ def make_and_solve_ILP(filename, optimized=False):
     print(size_to_group)
     # Instantiate a gurobi ILP model
     model = gp.Model()
-    model.setParam("Presolve", 1)
+
+    if not configFile == "":
+          model.read(configFile)
 
     # Each group has a binary variable per possible seat
     seated = model.addVars(xs, ys, group_amount, vtype=GRB.BINARY, name="seated")
@@ -151,6 +155,8 @@ def make_and_solve_ILP(filename, optimized=False):
         GRB.MAXIMIZE,
     )
 
+    constraintTime = time.time() - start
+
     print(
         "DONE ENCODING IN %s seconds.. STARTING OPTIMIZATION... "
         % (time.time() - start)
@@ -158,6 +164,8 @@ def make_and_solve_ILP(filename, optimized=False):
     start = time.time()
 
     model.optimize()
+
+    optimizeTime = time.time() - start
 
     # Get the solution
     solution = cinema.copy()
@@ -172,7 +180,35 @@ def make_and_solve_ILP(filename, optimized=False):
     print(solution)
     print("Not seated", people_amount - count_seated(solution), "out of", people_amount)
 
-    verify_cinema(solution, xs, ys)
+    valid = verify_cinema(solution, xs, ys)
+
+    return (filename, configFile, constraintTime, optimizeTime, group_amount, people_amount, valid, people_amount - count_seated(solution))
+
+def experiment_runner(optimize=False):
+    instanceFolder = "./Offline/instances"
+    configFolder = "./Offline/configs"
+    fields = ['InstanceFile', 'ConfigFile', 'ConstraintTime', 'OptimizationTime', 'TotalNumberOfGroups', 'TotalNumberOfPeople', 'Valid', 'Seated']  
+    resultsFile = "./Offline/results/python_{}.csv".format(datetime.now().strftime("%d-%m-%Y-%H-%M-%S"))
+
+    
+    with open(resultsFile, 'w+', newline='') as csvfile:  
+        # creating a csv writer object  
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(fields)  
+
+    for i in range(1, len(os.listdir(instanceFolder))):
+        instanceFile = "{}/Exact{}.txt".format(instanceFolder, i)
+        configFile = "{}/tune_Exact{}_0.prm".format(configFolder, i)
+
+        solveResult = make_and_solve_ILP(instanceFile, optimize, configFile)
+
+        with open(resultsFile, 'a+', newline='') as csvfile:  
+        # creating a csv writer object  
+            csvwriter = csv.writer(csvfile)
+
+            csvwriter.writerow(np.asarray(solveResult))
+
+    
 
 
 if __name__ == "__main__":
@@ -191,4 +227,9 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    make_and_solve_ILP(args.filename, args.optimize)
+    args.experiments = True
+
+    if args.experiments:
+        experiment_runner(args.optimize)
+    else:
+        make_and_solve_ILP(args.filename, args.optimize)

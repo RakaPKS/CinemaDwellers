@@ -149,6 +149,8 @@ def verify_cinema(cinema, xlen, ylen):
     else:
         print("DOOOOH! YOUR CINEMA SEATING DOES NOT MEET THE CORONA GUIDELINES!")
 
+    return cinema_meets_corona_guidelines
+
 
 class TestCheckLegal(unittest.TestCase):
     """Checks for check_legal"""
