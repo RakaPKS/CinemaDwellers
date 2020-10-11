@@ -17,24 +17,28 @@ namespace newOnline
             // Our program uses multi-threading, which is incredibly slow in the debug mode of Visual Studio.
             // Run the program using ctrl+F5 to run outside of the debugger for the actual performance speed.
 
-            for (int i = 0; i < 18; i++)
-            {
-                Console.WriteLine("Start of test Online" + (i + 1) + ".");
-                var reader = new StreamReader("..\\..\\..\\TestCases\\Online" + (i + 1) + ".txt");
-                var cinema = readCinema(reader);
+            var stopwatch = new System.Diagnostics.Stopwatch();
 
-                var people = readPeople(reader);
+            stopwatch.Start();
 
-                var solver = new Solver(cinema, people);
+            var reader = new StreamReader("..\\..\\..\\biggest_boye.txt");
+            var cinema = readCinema(reader);
 
-                solver.Solve();
+            var people = readPeople(reader);
 
-                Solver.printCinema(cinema);
+            var solver = new Solver(cinema, people);
 
-                int totalPeople = people.Sum();
+            solver.Solve();
 
-                Console.WriteLine("Seated " + Solver.countSeated(cinema) + " people out of " + totalPeople + " total people.");
-            }
+            Solver.printCinema(cinema);
+
+            int totalPeople = people.Sum();
+
+            Console.WriteLine("Seated " + Solver.countSeated(cinema) + " people out of " + totalPeople + " total people.");
+
+            stopwatch.Stop();
+
+            Console.WriteLine("Done in " + stopwatch.Elapsed.ToString() + " seconds.");
 
             Console.ReadLine();
         }
