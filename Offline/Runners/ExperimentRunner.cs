@@ -8,42 +8,6 @@ using System.Text;
 
 namespace Offline.Runners
 {
-    public class TuneVsNoTuneResult
-    {
-        public string InstanceFile { get; set; }
-        public int TotalNumberOfGroups { get; set; }
-
-        public string ConfigFileTuned { get; set; }
-
-        public string OptimizationTimeTuned { get; set; }
-        public string OptimizationTimeNotTuned { get; set; }
-
-        public bool ValidTuned { get; set; }
-        public bool ValidNotTuned { get; set; }
-
-        public int SeatedTuned { get; set; }
-        public int SeatedNotTuned { get; set; }
-        public int TotalNumberOfPeople { get; internal set; }
-    }
-
-    public class GreedyVsILPResult
-    {
-        public string InstanceFile { get; set; }
-        public int TotalNumberOfGroups { get; set; }
-        public int TotalNumberOfPeople { get; internal set; }
-        public string ConfigFile { get; set; }
-
-        public string ILPTime { get; set; }
-        public string GreedyTime { get; set; }
-
-        public bool ValidILP { get; set; }
-        public bool ValidGreedy { get; set; }
-
-        public int SeatedILP { get; set; }
-        public int SeatedGreedy { get; set; }
-
-    }
-
     public class ExperimentRunner
     {
         private ProgramOptions Options { get; set; }
@@ -75,13 +39,64 @@ namespace Offline.Runners
                 else if (experimentId == 3)
                 {
                     RunTuning();
+                } else if (experimentId == 4)
+                {
+                    RunNormalSolver();
+                }
+            }
+        }
+
+        private void RunNormalSolver()
+        {
+            var resultsFile = $"{ResultsFolder}normal_solver_{DateTime.Now.ToString("yyyy-dd-M-HH-mm-ss")}.csv";
+
+            using (var writer = new StreamWriter(resultsFile))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                csv.WriteHeader(typeof(NormalILPSolverResult));
+                csv.NextRecord();
+            }
+
+            for (int i = 1; i <= NumberOfInstances; i++)
+            {
+                using (var stream = File.Open(resultsFile, FileMode.Append))
+                using (var writer = new StreamWriter(stream))
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    csv.Configuration.HasHeaderRecord = false;
+
+                    var instanceFile = $"{InstancesFolder}/Exact{i}.txt";
+                    var configFile = $"{ConfigsFolder}tune_Exact{i}_0.prm";
+
+                    var cinema = CinemaReader.Read(instanceFile);
+
+                    var solver = new ILPSolver(cinema);
+                    var times = solver.Solve(false, Options.Debug, paramFile: configFile);
+
+                    var result = new NormalILPSolverResult
+                    {
+                        InstanceFile = instanceFile,
+                        ConfigFile = configFile,
+
+                        TotalNumberOfGroups = cinema.TotalNumberOfGroups,
+                        TotalNumberOfPeople = cinema.TotalNumberOfPeople,
+
+                        OptimizationTime = times["Optimizing"],
+                        ConstraintTime = times["Add Constraints"],
+                       
+                        Seated = cinema.CountSeated(),
+                        Valid = cinema.Verify()
+                    };
+
+                    csv.WriteRecord(result);
+                    csv.NextRecord();
                 }
             }
         }
 
         private void RunTuneVsNoTune()
         {
-            var resultsFile = $"{ResultsFolder}tune_vs_no_tune_{DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss")}.csv";
+            var resultsFile = $"{ResultsFolder}tune_vs_no_tune_{DateTime.Now.ToString("yyyy-dd-M-HH-mm-ss")}.csv";
 
             using (var writer = new StreamWriter(resultsFile))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
@@ -135,7 +150,7 @@ namespace Offline.Runners
 
         private void RunGreedyVsNoGreedy()
         {
-            var resultsFile = $"{ResultsFolder}greedy_vs_ilp_{DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss")}.csv";
+            var resultsFile = $"{ResultsFolder}greedy_vs_ilp_{DateTime.Now.ToString("yyyy-dd-M-HH-mm-ss")}.csv";
 
             using (var writer = new StreamWriter(resultsFile))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
@@ -189,7 +204,7 @@ namespace Offline.Runners
 
         private void RunTuning()
         {
-            var resultsFile = $"{ResultsFolder}greedy_vs_ilp_{DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss")}.csv";
+            var resultsFile = $"{ResultsFolder}greedy_vs_ilp_{DateTime.Now.ToString("yyyy-dd-M-HH-mm-ss")}.csv";
 
             using (var writer = new StreamWriter(resultsFile))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
@@ -210,5 +225,60 @@ namespace Offline.Runners
                 solverILP.Solve(true, Options.Debug, tuneFile, configFile);
             }
         }
+    }
+
+    public class TuneVsNoTuneResult
+    {
+        public string InstanceFile { get; set; }
+        public int TotalNumberOfGroups { get; set; }
+
+        public string ConfigFileTuned { get; set; }
+
+        public string OptimizationTimeTuned { get; set; }
+        public string OptimizationTimeNotTuned { get; set; }
+
+        public bool ValidTuned { get; set; }
+        public bool ValidNotTuned { get; set; }
+
+        public int SeatedTuned { get; set; }
+        public int SeatedNotTuned { get; set; }
+        public int TotalNumberOfPeople { get; internal set; }
+    }
+
+    public class GreedyVsILPResult
+    {
+        public string InstanceFile { get; set; }
+        public int TotalNumberOfGroups { get; set; }
+        public int TotalNumberOfPeople { get; internal set; }
+        public string ConfigFile { get; set; }
+
+        public string ILPTime { get; set; }
+        public string GreedyTime { get; set; }
+
+        public bool ValidILP { get; set; }
+        public bool ValidGreedy { get; set; }
+
+        public int SeatedILP { get; set; }
+        public int SeatedGreedy { get; set; }
+
+    }
+
+    public class NormalILPSolverResult
+    {
+        public string InstanceFile { get; set; }
+
+        public string ConfigFile { get; set; }
+
+        public string OptimizationTime { get; set; }
+
+        public string ConstraintTime { get; set; }
+
+        public int TotalNumberOfGroups { get; set; }
+
+        public int TotalNumberOfPeople { get; set; }
+
+        public bool Valid { get; set; }
+
+        public int Seated { get; set; }
     }
 }

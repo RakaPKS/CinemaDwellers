@@ -52,9 +52,6 @@ namespace Offline.Models
 
             TotalNumberOfGroups = Groups.Sum(kv => kv.Value);
             GroupSizes = GetGroupsAsArray();
-            foreach (var g in GroupSizes){
-                Console.WriteLine("A group " + g);
-            }
             // TODO: Use this as an upper bound for the greedy algorithm
             // Note that this should be done after the pre-processing step above
             TotalNumberOfPeople = GroupSizes.Sum();
