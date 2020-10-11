@@ -34,10 +34,9 @@ namespace newOnline
                 int totalPeople = people.Sum();
 
                 Console.WriteLine("Seated " + Solver.countSeated(cinema) + " people out of " + totalPeople + " total people.");
-
-                Console.ReadLine();
             }
-                   
+
+            Console.ReadLine();
         }
 
         /// <summary>
@@ -69,12 +68,15 @@ namespace newOnline
         static List<int> readPeople(TextReader reader)
         {
             var people = new List<int>();
-            int nextGroup;
-            while ((nextGroup = reader.Read() - 48) != 0)
+            int nextGroup = reader.Read() - 48;
+            while (nextGroup != 0)
             {
-                reader.Read();
                 people.Add(nextGroup);
+                nextGroup = reader.Read() - 48;
+                while (nextGroup < 0 || nextGroup > 9)
+                    nextGroup = reader.Read() - 48;
             }
+            reader.Close();
             return people;
         }
 
