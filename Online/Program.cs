@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.IO;
 
 namespace newOnline
 {
@@ -9,27 +10,89 @@ namespace newOnline
     {
         static void Main(string[] args)
         {
-            int h = int.Parse(Console.ReadLine());
-            int w = int.Parse(Console.ReadLine());
+            // Our program uses multi-threading, which is incredibly slow in the debug mode of Visual Studio.
+            // Run the program using ctrl+F5 to run outside of the debugger for the actual performance speed.
+
+            for (int i = 0; i < 18; i++)
+            {
+                Console.WriteLine("Start of test Online" + (i + 1) + ".");
+                var reader = new StreamReader("..\\..\\..\\TestCases\\Online" + (i + 1) + ".txt");
+                var cinema = readCinema(reader);
+
+                var people = readPeople(reader);
+
+                var solver = new Solver(cinema, people);
+
+                solver.Solve();
+
+                Solver.printCinema(cinema);
+
+                int totalPeople = people.Sum();
+
+                Console.WriteLine("Seated " + Solver.countSeated(cinema) + " people out of " + totalPeople + " total people.");
+
+                Console.ReadLine();
+            }
+                   
+        }
+
+        /// <summary>
+        /// Read in the cinema using the given reader object.
+        /// </summary>
+        /// <returns>Returns the cinema in an n * m matrix.</returns>
+        static int[,] readCinema(TextReader reader)
+        {
+            int h = int.Parse(reader.ReadLine());
+            int w = int.Parse(reader.ReadLine());
             var cinema = new int[w, h];
             for (int i = 0; i < h; i++)
             {
-                string line = Console.ReadLine();
+                string line = reader.ReadLine();
                 for (int j = 0; j < w; j++)
                 {
                     cinema[j, i] = line[j] - 48;
                 }
             }
 
+            return cinema;
+        }
+
+        /// <summary>
+        /// Read in the people using the given reader object.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns>Returns a list of integers, representing the people visiting the cinema.</returns>
+        static List<int> readPeople(TextReader reader)
+        {
             var people = new List<int>();
             int nextGroup;
-            while ((nextGroup = Console.Read() - 48) != 0)
+            while ((nextGroup = reader.Read() - 48) != 0)
             {
-                Console.Read();
+                reader.Read();
                 people.Add(nextGroup);
             }
+            return people;
+        }
 
-            var seatData = initializeSeatData(cinema, w, h);
+    }
+
+    public class Solver
+    {
+        public int[,] cinema;
+        public List<int> people;
+
+        public Solver(int[,] cinema, List<int> people)
+        {
+            this.cinema = cinema;
+            this.people = people;
+        }
+
+        /// <summary>
+        /// Run the solver. Modifies the cinema object of this class to be the result.
+        /// </summary>
+        public void Solve()
+        {
+            var seatData = initializeSeatData(cinema, cinema.GetLength(0), cinema.GetLength(1));
 
             for (int i = 0; i < people.Count; i++)
             {
@@ -40,17 +103,16 @@ namespace newOnline
                     updateSeatData(cinema, seatData, x, y, people[i]);
                 }
             }
-
-            printCinema(cinema);
-
-            int totalPeople = people.Sum();
-
-            Console.WriteLine("Seated " + countSeated(cinema) + " people out of " + totalPeople + " total people.");
-
-            Console.ReadLine();
         }
 
-        static int[][,] initializeSeatData(int[,] cinema, int w, int h)
+        /// <summary>
+        /// Calculate what seating a group of every size in every location costs.
+        /// </summary>
+        /// <param name="cinema">cinema object to run these calculations on.</param>
+        /// <param name="w">width of the cinema</param>
+        /// <param name="h">height of the cinema</param>
+        /// <returns>Returns a list of 2d matrices of size 8. Every matrix contains the cost for every seat to seat a group of (index +1) there.</returns>
+        private int[][,] initializeSeatData(int[,] cinema, int w, int h)
         {
             int[][,] result = new int[8][,];
             for (int i = 0; i < 8; i++)
@@ -64,7 +126,15 @@ namespace newOnline
             return result;
         }
 
-        static void updateSeatData(int[,] cinema, int[][,] seatData, int x, int y, int groupSize)
+        /// <summary>
+        /// Update the seating cost matrix when placing a group of groupSize at (x, y).
+        /// </summary>
+        /// <param name="cinema">Cinema to seat people in.</param>
+        /// <param name="seatData">Matrix to update</param>
+        /// <param name="x">X location of seated group.</param>
+        /// <param name="y">Y location of seated group.</param>
+        /// <param name="groupSize">Size of seated group.</param>
+        private void updateSeatData(int[,] cinema, int[][,] seatData, int x, int y, int groupSize)
         {
             for (int k = 0; k < 8; k++)
                 for (int j = -2; j < 3; j++)
@@ -81,7 +151,15 @@ namespace newOnline
                     }
         }
 
-        static int countDisabledSeats(int[,] cinema, int x, int y, int groupSize)
+        /// <summary>
+        /// Count how many seats will be disabled if we place a group of size groupSize at (x,y).
+        /// </summary>
+        /// <param name="cinema">Cinema to seat people in.</param>
+        /// <param name="x">X location of seated group.</param>
+        /// <param name="y">Y location of seated group.</param>
+        /// <param name="groupSize">Size of seated group.</param>
+        /// <returns>Returns how many seats will be disabled if we place the group here.</returns>
+        private int countDisabledSeats(int[,] cinema, int x, int y, int groupSize)
         {
             int result = 0;
 
@@ -102,7 +180,15 @@ namespace newOnline
             return (result == 0) ? -1 : result;
         }
 
-        static bool doesGroupFit(int[,] cinema, int x, int y, int groupSize)
+        /// <summary>
+        /// Can you fit a group of size groupSize at (x,y)?
+        /// </summary>
+        /// <param name="cinema">Cinema to seat people in.</param>
+        /// <param name="x">X position to seat group.</param>
+        /// <param name="y">Y position to seat group.</param>
+        /// <param name="groupSize">Size of group to seat.</param>
+        /// <returns></returns>
+        private bool doesGroupFit(int[,] cinema, int x, int y, int groupSize)
         {
             for (int i = 0; i < groupSize; i++)
                 if (x + i >= cinema.GetLength(0) || cinema[x + i, y] != 1)
@@ -110,14 +196,20 @@ namespace newOnline
             return true;
         }
 
-        static (int, int) findBestPos(int[][,] seatData, int groupSize)
+        /// <summary>
+        /// Find the best position to seat a group of size groupSize in the cinema.
+        /// </summary>
+        /// <param name="seatData">Array of 2d matrices containing seating cost data.</param>
+        /// <param name="groupSize">Size of group to seat.</param>
+        /// <returns>(x,y) tuple of where the place the group. If the tuple is (-1, -1), the group cannot be seated.</returns>
+        private (int, int) findBestPos(int[][,] seatData, int groupSize)
         {
 
             int noThreads, noPortThreads;
 
             ThreadPool.GetMaxThreads(out noThreads, out noPortThreads);
 
-            noThreads = Math.Min(noThreads, 16);// seatData[groupSize - 1].GetLength(1));
+            noThreads = Math.Min(noThreads, 16);
 
             var threads = new Thread[noThreads];
 
@@ -127,9 +219,9 @@ namespace newOnline
             {
                 int index = k;
                 threadResults[index] = ((-1, -1), int.MaxValue);
-                
+
                 threads[k] = new Thread(() => {
-                    for (int j = ((seatData[groupSize - 1].GetLength(1) / noThreads) + 1) * index ; j < ((seatData[groupSize - 1].GetLength(1) / noThreads) + 1) * (index + 1) && j < seatData[groupSize - 1].GetLength(1); j++)
+                    for (int j = ((seatData[groupSize - 1].GetLength(1) / noThreads) + 1) * index; j < ((seatData[groupSize - 1].GetLength(1) / noThreads) + 1) * (index + 1) && j < seatData[groupSize - 1].GetLength(1); j++)
                         for (int i = 0; i < seatData[groupSize - 1].GetLength(0); i++)
                         {
                             if (seatData[groupSize - 1][i, j] != -1 && seatData[groupSize - 1][i, j] < threadResults[index].Item2)
@@ -165,7 +257,14 @@ namespace newOnline
             return result;
         }
 
-        static void placeGroup(int[,] cinema, int x, int y, int groupSize)
+        /// <summary>
+        /// Place a group of size groupSize at (x,y). Updates cinema.
+        /// </summary>
+        /// <param name="cinema">Cinema to place group in.</param>
+        /// <param name="x">X position to place group.</param>
+        /// <param name="y">Y position to place group.</param>
+        /// <param name="groupSize">Size of group to place.</param>
+        private void placeGroup(int[,] cinema, int x, int y, int groupSize)
         {
             for (int i = -1; i < groupSize + 1; i++)
                 for (int j = -1; j < 2; j++)
@@ -184,7 +283,12 @@ namespace newOnline
                     cinema[x + i, y] = 2;
         }
 
-        static int countSeated(int[,] cinema)
+        /// <summary>
+        /// Count how many people are seated in cinema.
+        /// </summary>
+        /// <param name="cinema">Cinema to count seated people.</param>
+        /// <returns>Amount of people seated as an integer.</returns>
+        public static int countSeated(int[,] cinema)
         {
             int res = 0;
             for (int i = 0; i < cinema.GetLength(0); i++)
@@ -193,7 +297,11 @@ namespace newOnline
             return res;
         }
 
-        static void printCinema(int[,] cinema)
+        /// <summary>
+        /// Print a cinema to the screen.
+        /// </summary>
+        /// <param name="cinema">Cinema to print.</param>
+        public static void printCinema(int[,] cinema)
         {
             var res = "";
 
@@ -214,7 +322,14 @@ namespace newOnline
             Console.WriteLine();
         }
 
-        static bool inRange(int[,] cinema, int x, int y)
+        /// <summary>
+        /// Checks if (x,y) is in range of the matrix cinema.
+        /// </summary>
+        /// <param name="cinema">Matrix to check if (x,y) is in range.</param>
+        /// <param name="x">X position to check if is in range.</param>
+        /// <param name="y">Y position to check if is in range.</param>
+        /// <returns></returns>
+        public static bool inRange(int[,] cinema, int x, int y)
         {
             bool res = x >= 0 && x < cinema.GetLength(0) && y >= 0 && y < cinema.GetLength(1);
             return res;
