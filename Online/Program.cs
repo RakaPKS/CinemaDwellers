@@ -220,61 +220,17 @@ namespace newOnline
         /// <returns>(x,y) tuple of where the place the group. If the tuple is (-1, -1), the group cannot be seated.</returns>
         private (int, int) findBestPos(int[][,] seatData, int groupSize)
         {
-            // setting up multi-threading
-            int noThreads, noPortThreads;
-
-            ThreadPool.GetMaxThreads(out noThreads, out noPortThreads);
-
-            noThreads = Math.Min(noThreads, 16);
-
-            var threads = new Thread[noThreads];
-
-            var threadResults = new ((int, int), int)[noThreads];
-
-            // create the threads
-            for (int k = 0; k < noThreads; k++)
-            {
-                int index = k;
-                threadResults[index] = ((-1, -1), int.MaxValue);
-
-                threads[k] = new Thread(() => {
-                    for (int j = ((seatData[groupSize - 1].GetLength(1) / noThreads) + 1) * index; j < ((seatData[groupSize - 1].GetLength(1) / noThreads) + 1) * (index + 1) && j < seatData[groupSize - 1].GetLength(1); j++)
-                        for (int i = 0; i < seatData[groupSize - 1].GetLength(0); i++)
-                        {
-                            if (seatData[groupSize - 1][i, j] != -1 && seatData[groupSize - 1][i, j] < threadResults[index].Item2)
-                            {
-                                threadResults[index] = ((i, j), seatData[groupSize - 1][i, j]);
-                            }
-                        }
-                });
-            }
-
-            // run the threads
-            for (int k = 0; k < noThreads; k++)
-            {
-                threads[k].Start();
-            }
-
-            // wait for the threads to finish
-            for (int k = 0; k < noThreads; k++)
-            {
-                threads[k].Join();
-            }
-
-            // join the results to find the best value of the matrix.
-            (var result, var value) = ((-1, -1), int.MaxValue);
-
-            for (int i = 0; i < noThreads; i++)
-            {
-                if (threadResults[i].Item2 < value)
+            var result = (-1, -1, -1);
+            for (int j = 0; j  < seatData[groupSize - 1].GetLength(1); j++)
+                for (int i = 0; i < seatData[groupSize - 1].GetLength(0); i++)
                 {
-                    result = threadResults[i].Item1;
-                    value = threadResults[i].Item2;
+                    if (seatData[groupSize - 1][i, j] != -1 && seatData[groupSize - 1][i, j] < result.Item2)
+                    {
+                        result = (i, j, seatData[groupSize - 1][i, j]);
+                    }
                 }
 
-            }
-
-            return result;
+            return (result.Item1, result.Item2);
         }
 
         /// <summary>
