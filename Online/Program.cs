@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.IO;
+using System.Diagnostics;
 
 namespace newOnline
 {
@@ -17,30 +18,26 @@ namespace newOnline
             // Our program uses multi-threading, which is incredibly slow in the debug mode of Visual Studio.
             // Run the program using ctrl+F5 to run outside of the debugger for the actual performance speed.
 
-            var stopwatch = new System.Diagnostics.Stopwatch();
+            for (int i = 0; i < 18; i++)
+            {
+                Console.WriteLine("Start of test Online" + (i + 1) + ".");
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+                var reader = new StreamReader("..\\..\\..\\TestCases\\Online" + (i + 1) + ".txt");
+                var cinema = readCinema(reader);
 
-            stopwatch.Start();
+                var people = readPeople(reader);
 
-            var reader = new StreamReader("..\\..\\..\\biggest_boye.txt");
-            var cinema = readCinema(reader);
+                var solver = new Solver(cinema, people);
 
-            var people = readPeople(reader);
+                solver.Solve();
 
-            var solver = new Solver(cinema, people);
+                Solver.printCinema(cinema);
 
-            solver.Solve();
-
-            Solver.printCinema(cinema);
-
-            int totalPeople = people.Sum();
-
-            Console.WriteLine("Seated " + Solver.countSeated(cinema) + " people out of " + totalPeople + " total people.");
-
-            stopwatch.Stop();
-
-            Console.WriteLine("Done in " + stopwatch.Elapsed.ToString() + " seconds.");
-
-            Console.ReadLine();
+                int totalPeople = people.Sum();
+                stopwatch.Stop();
+                Console.WriteLine("Seated " + Solver.countSeated(cinema) + " people out of " + totalPeople + " total people, taking " + stopwatch.Elapsed + ".");
+            }
         }
 
         /// <summary>
@@ -220,17 +217,61 @@ namespace newOnline
         /// <returns>(x,y) tuple of where the place the group. If the tuple is (-1, -1), the group cannot be seated.</returns>
         private (int, int) findBestPos(int[][,] seatData, int groupSize)
         {
-            var result = (-1, -1, -1);
-            for (int j = 0; j  < seatData[groupSize - 1].GetLength(1); j++)
-                for (int i = 0; i < seatData[groupSize - 1].GetLength(0); i++)
+            // setting up multi-threading
+            int noThreads, noPortThreads;
+
+            ThreadPool.GetMaxThreads(out noThreads, out noPortThreads);
+
+            noThreads = Math.Min(noThreads, 16);
+
+            var threads = new Thread[noThreads];
+
+            var threadResults = new ((int, int), int)[noThreads];
+
+            // create the threads
+            for (int k = 0; k < noThreads; k++)
+            {
+                int index = k;
+                threadResults[index] = ((-1, -1), int.MaxValue);
+
+                threads[k] = new Thread(() => {
+                    for (int j = ((seatData[groupSize - 1].GetLength(1) / noThreads) + 1) * index; j < ((seatData[groupSize - 1].GetLength(1) / noThreads) + 1) * (index + 1) && j < seatData[groupSize - 1].GetLength(1); j++)
+                        for (int i = 0; i < seatData[groupSize - 1].GetLength(0); i++)
+                        {
+                            if (seatData[groupSize - 1][i, j] != -1 && seatData[groupSize - 1][i, j] < threadResults[index].Item2)
+                            {
+                                threadResults[index] = ((i, j), seatData[groupSize - 1][i, j]);
+                            }
+                        }
+                });
+            }
+
+            // run the threads
+            for (int k = 0; k < noThreads; k++)
+            {
+                threads[k].Start();
+            }
+
+            // wait for the threads to finish
+            for (int k = 0; k < noThreads; k++)
+            {
+                threads[k].Join();
+            }
+
+            // join the results to find the best value of the matrix.
+            (var result, var value) = ((-1, -1), int.MaxValue);
+
+            for (int i = 0; i < noThreads; i++)
+            {
+                if (threadResults[i].Item2 < value)
                 {
-                    if (seatData[groupSize - 1][i, j] != -1 && seatData[groupSize - 1][i, j] < result.Item2)
-                    {
-                        result = (i, j, seatData[groupSize - 1][i, j]);
-                    }
+                    result = threadResults[i].Item1;
+                    value = threadResults[i].Item2;
                 }
 
-            return (result.Item1, result.Item2);
+            }
+
+            return result;
         }
 
         /// <summary>
