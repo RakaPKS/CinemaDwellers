@@ -21,7 +21,7 @@ namespace newOnline
 
             stopwatch.Start();
 
-            var reader = new StreamReader("..\\..\\..\\TheMonsterOnline.txt");
+            var reader = new StreamReader("..\\..\\..\\biggest_boye.txt");
             var cinema = readCinema(reader);
 
             var people = readPeople(reader);
