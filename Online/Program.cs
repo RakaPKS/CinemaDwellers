@@ -21,7 +21,7 @@ namespace newOnline
 
             stopwatch.Start();
 
-            var reader = new StreamReader("..\\..\\..\\biggest_boye.txt");
+            var reader = new StreamReader("..\\..\\..\\TheMonsterOnline.txt");
             var cinema = readCinema(reader);
 
             var people = readPeople(reader);
@@ -39,8 +39,6 @@ namespace newOnline
             stopwatch.Stop();
 
             Console.WriteLine("Done in " + stopwatch.Elapsed.ToString() + " seconds.");
-
-            Console.ReadLine();
         }
 
         /// <summary>
@@ -220,11 +218,11 @@ namespace newOnline
         /// <returns>(x,y) tuple of where the place the group. If the tuple is (-1, -1), the group cannot be seated.</returns>
         private (int, int) findBestPos(int[][,] seatData, int groupSize)
         {
-            var result = (-1, -1, -1);
+            var result = (-1, -1, int.MaxValue);
             for (int j = 0; j  < seatData[groupSize - 1].GetLength(1); j++)
                 for (int i = 0; i < seatData[groupSize - 1].GetLength(0); i++)
                 {
-                    if (seatData[groupSize - 1][i, j] != -1 && seatData[groupSize - 1][i, j] < result.Item2)
+                    if (seatData[groupSize - 1][i, j] != -1 && seatData[groupSize - 1][i, j] < result.Item3)
                     {
                         result = (i, j, seatData[groupSize - 1][i, j]);
                     }
