@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.IO;
+using System.Diagnostics;
 
 namespace newOnline
 {
@@ -17,28 +18,26 @@ namespace newOnline
             // Our program uses multi-threading, which is incredibly slow in the debug mode of Visual Studio.
             // Run the program using ctrl+F5 to run outside of the debugger for the actual performance speed.
 
-            var stopwatch = new System.Diagnostics.Stopwatch();
+            for (int i = 0; i < 18; i++)
+            {
+                Console.WriteLine("Start of test Online" + (i + 1) + ".");
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+                var reader = new StreamReader("..\\..\\..\\TestCases\\Online" + (i + 1) + ".txt");
+                var cinema = readCinema(reader);
 
-            stopwatch.Start();
+                var people = readPeople(reader);
 
-            var reader = new StreamReader("..\\..\\..\\biggest_boye.txt");
-            var cinema = readCinema(reader);
+                var solver = new Solver(cinema, people);
 
-            var people = readPeople(reader);
+                solver.Solve();
 
-            var solver = new Solver(cinema, people);
+                Solver.printCinema(cinema);
 
-            solver.Solve();
-
-            Solver.printCinema(cinema);
-
-            int totalPeople = people.Sum();
-
-            Console.WriteLine("Seated " + Solver.countSeated(cinema) + " people out of " + totalPeople + " total people.");
-
-            stopwatch.Stop();
-
-            Console.WriteLine("Done in " + stopwatch.Elapsed.ToString() + " seconds.");
+                int totalPeople = people.Sum();
+                stopwatch.Stop();
+                Console.WriteLine("Seated " + Solver.countSeated(cinema) + " people out of " + totalPeople + " total people, taking " + stopwatch.Elapsed + ".");
+            }
         }
 
         /// <summary>
@@ -219,7 +218,7 @@ namespace newOnline
         private (int, int) findBestPos(int[][,] seatData, int groupSize)
         {
             var result = (-1, -1, int.MaxValue);
-            for (int j = 0; j  < seatData[groupSize - 1].GetLength(1); j++)
+            for (int j = 0; j < seatData[groupSize - 1].GetLength(1); j++)
                 for (int i = 0; i < seatData[groupSize - 1].GetLength(0); i++)
                 {
                     if (seatData[groupSize - 1][i, j] != -1 && seatData[groupSize - 1][i, j] < result.Item3)
