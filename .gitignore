@@ -19,3 +19,4 @@ __pycache__/
 /Online/__pycache__
 /Online/obj
 /Online/bin/Debug/netcoreapp3.1
+.vs/
