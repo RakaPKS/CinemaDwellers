@@ -1,0 +1,10 @@
+InstanceFile,ConfigFile,OptimizationTime,ConstraintTime,TotalNumberOfGroups,TotalNumberOfPeople,Valid,Seated
+../../../instances//Exact1.txt,../../../configs/tune_Exact1_0.prm,00:00:00.05,00:00:00.03,5,6,True,4
+../../../instances//Exact2.txt,../../../configs/tune_Exact2_0.prm,00:00:00.01,00:00:00.00,5,11,True,7
+../../../instances//Exact3.txt,../../../configs/tune_Exact3_0.prm,00:00:00.00,00:00:00.00,3,14,True,8
+../../../instances//Exact4.txt,../../../configs/tune_Exact4_0.prm,00:00:00.08,00:00:00.03,13,28,True,28
+../../../instances//Exact5.txt,../../../configs/tune_Exact5_0.prm,00:00:00.03,00:00:00.01,7,19,True,19
+../../../instances//Exact6.txt,../../../configs/tune_Exact6_0.prm,00:00:01.41,00:00:00.18,21,64,True,38
+../../../instances//Exact7.txt,../../../configs/tune_Exact7_0.prm,00:00:00.57,00:00:00.12,14,56,True,40
+../../../instances//Exact8.txt,../../../configs/tune_Exact8_0.prm,00:00:01.50,00:00:00.15,18,35,True,33
+../../../instances//Exact9.txt,../../../configs/tune_Exact9_0.prm,00:00:00.09,00:00:00.04,16,43,True,43

@@ -1,0 +1,3 @@
+InstanceFile,TotalNumberOfGroups,ConfigFileTuned,OptimizationTimeTuned,OptimizationTimeNotTuned,ValidTuned,ValidNotTuned,SeatedTuned,SeatedNotTuned,TotalNumberOfPeople
+../../../instances//Exact1.txt,5,../../../configs/tune_Exact1_0.prm,00:00:00.00,00:00:00.00,True,True,4,4,6
+../../../instances//Exact2.txt,5,../../../configs/tune_Exact2_0.prm,00:00:00.01,00:00:00.00,True,True,7,7,11

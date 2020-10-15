@@ -1,0 +1,10 @@
+InstanceFile,TotalNumberOfGroups,TotalNumberOfPeople,ConfigFile,ILPTime,GreedyTime,ValidILP,ValidGreedy,SeatedILP,SeatedGreedy
+../../../instances//Exact1.txt,5,6,../../../configs/tune_Exact1_0.prm,00:00:00.06,00:00:00.00,True,True,4,3
+../../../instances//Exact2.txt,5,11,../../../configs/tune_Exact2_0.prm,00:00:00.01,00:00:00.00,True,True,7,7
+../../../instances//Exact3.txt,3,14,../../../configs/tune_Exact3_0.prm,00:00:00.00,00:00:00.00,True,True,8,6
+../../../instances//Exact4.txt,13,28,../../../configs/tune_Exact4_0.prm,00:00:00.12,00:00:00.00,True,True,28,28
+../../../instances//Exact5.txt,7,19,../../../configs/tune_Exact5_0.prm,00:00:00.05,00:00:00.00,True,True,19,19
+../../../instances//Exact6.txt,21,64,../../../configs/tune_Exact6_0.prm,00:00:01.83,00:00:00.00,True,True,38,37
+../../../instances//Exact7.txt,14,56,../../../configs/tune_Exact7_0.prm,00:00:00.77,00:00:00.00,True,True,40,40
+../../../instances//Exact8.txt,18,35,../../../configs/tune_Exact8_0.prm,00:00:01.46,00:00:00.00,True,True,33,30
+../../../instances//Exact9.txt,16,43,../../../configs/tune_Exact9_0.prm,00:00:00.16,00:00:00.00,True,True,43,43

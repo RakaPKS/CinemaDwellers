@@ -1,0 +1,10 @@
+InstanceFile,ConfigFile,ConstraintTime,OptimizationTime,TotalNumberOfGroups,TotalNumberOfPeople,Valid,Seated
+./Offline/instances/Exact1.txt,./Offline/configs/tune_Exact1_0.prm,0.01600337028503418,0.005002498626708984,5,6,True,2
+./Offline/instances/Exact2.txt,./Offline/configs/tune_Exact2_0.prm,0.009997367858886719,0.02300429344177246,6,16,True,9
+./Offline/instances/Exact3.txt,./Offline/configs/tune_Exact3_0.prm,0.008001565933227539,0.01700305938720703,3,14,True,6
+./Offline/instances/Exact4.txt,./Offline/configs/tune_Exact4_0.prm,0.16103482246398926,0.12102818489074707,13,28,True,0
+./Offline/instances/Exact5.txt,./Offline/configs/tune_Exact5_0.prm,0.06401395797729492,0.05401301383972168,7,19,True,0
+./Offline/instances/Exact6.txt,./Offline/configs/tune_Exact6_0.prm,0.7561681270599365,1.7906606197357178,21,64,True,26
+./Offline/instances/Exact7.txt,./Offline/configs/tune_Exact7_0.prm,0.39908885955810547,0.5481228828430176,14,56,True,16
+./Offline/instances/Exact8.txt,./Offline/configs/tune_Exact8_0.prm,0.6861519813537598,1.785400629043579,18,35,True,2
+./Offline/instances/Exact9.txt,./Offline/configs/tune_Exact9_0.prm,0.35307884216308594,0.10402393341064453,16,43,True,0
