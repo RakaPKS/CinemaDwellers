@@ -8,7 +8,6 @@ __pycache__/
 ################################################################################
 
 /CinemaGenerator2000/numpy
-/CinemaGenerator2000/.vs/CinemaGenerator2000/v16
 /CinemaGenerator2000/cinema.txt
 /CinemaGenerator2000/cinema_online.txt
 
@@ -16,3 +15,7 @@ __pycache__/
 /Offline/bin/*
 /OfflineTests/obj/*
 /Offline/obj/*
+*/.vs/*
+/Online/__pycache__
+/Online/obj
+/Online/bin/Debug/netcoreapp3.1
