@@ -1,10 +1,20 @@
-﻿################################################################################
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# for plebs
+**/.vscode/
+
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
 /CinemaGenerator2000/numpy
 /CinemaGenerator2000/cinema.txt
 /CinemaGenerator2000/cinema_online.txt
+
+/OfflineTests/bin/*
+/Offline/bin/*
+/OfflineTests/obj/*
+/Offline/obj/*
 */.vs/*
 /Online/__pycache__
 /Online/obj
