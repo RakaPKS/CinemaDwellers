@@ -1,6 +1,4 @@
-# CinemaDwellers
-
-# Online
+# CinemaDwellers Online
 
 ## Algorithm
 
