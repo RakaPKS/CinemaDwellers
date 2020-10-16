@@ -10,7 +10,7 @@ The online algorithm is implemented as a C# solution (Online.cs)
 
 ### Experiments:
 
-Our program runs the 18 given test cases by default. If you want to run a different test case, replace the contents of the Main method with the following code snippet:
+Our program runs the 18 given test cases by default. If you want to run a different test case, replace the contents of the Main method with the following code snippet, where the string inside `new StreamReader("file location")`, is the location of the test case you want to run:
 
 ```csharp
 var reader = new StreamReader("file location");
