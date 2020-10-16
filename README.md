@@ -53,34 +53,34 @@ For convinience we have implemented 5 experiments. All results are written as a 
 1. Run a single instance using greedy first and then ILP solver.
 
 ```
-./Offline.exe -m Instance -c ./example_config.prm -i ./example_instance.txt
+./Offline.exe -d -m Instance -c ./example_config.prm -i ./example_instance.txt
 ```
 
 2. Run a single instance using greedy only.
 
 ```
-./Offline.exe -m Instance -c ./example_config.prm -i ./example_instance.txt -go
+./Offline.exe -d -m Instance -c ./example_config.prm -i ./example_instance.txt -go
 ```
 
 3. Run a single instance using ILP solver only.
 
 ```
-./Offline.exe -m Instance -c ./example_config.prm -i ./example_instance.txt -ilpo
+./Offline.exe -d -m Instance -c ./example_config.prm -i ./example_instance.txt -ilpo
 ```
 
 4. Tune a single instance.
 ```
-./Offline.exe -m Instance -i ./example_instance.txt -t -to ./example_tune.prm
+./Offline.exe -d -m Instance -i ./example_instance.txt -t -to ./example_tune.prm
 ```
 
 5. Run a single experiment.
 ```
-./Offline.exe -m Experiments -i ./test_instances/ -c ./test_configs -e 1
+./Offline.exe -d -m Experiments -i ./test_instances/ -c ./test_configs -e 1
 ```
 
 6. Run multiple experiments.
 ```
-./Offline.exe -m Experiments -i ./test_instances/ -c ./test_configs -e 1 -e 2 -e 3 -e 4 -e 5
+./Offline.exe -d -m Experiments -i ./test_instances/ -c ./test_configs -e 1 -e 2 -e 3 -e 4 -e 5
 ```
 
 ## How to run it in visual studio

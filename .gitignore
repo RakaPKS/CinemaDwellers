@@ -11,12 +11,15 @@ __pycache__/
 /CinemaGenerator2000/cinema.txt
 /CinemaGenerator2000/cinema_online.txt
 
-/OfflineTests/bin/*
-/Offline/bin/*
-/OfflineTests/obj/*
-/Offline/obj/*
+OfflineTests/bin/*
+Offline/Offline.cs/bin/*
+Offline/Offline.cs/obj/
+Offline/OfflineTests.cs/obj/
 */.vs/*
 /Online/__pycache__
 /Online/obj
 /Online/bin/Debug/netcoreapp3.1
 .vs/
+
+/Offline/Offline.cs/tune/*
+/Offline/Offline.cs/results/*
