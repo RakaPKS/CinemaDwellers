@@ -19,36 +19,39 @@ if not debug:
     n_columns_break = int(input("Every n seats add an empty column: "))
     perc_empty = float(input("Percentage of empty spaces: "))
     perc_seats_occupied = float(input("Percentage of seats occupied: "))
-    online = bool(input("Online(boolean):" ))
+    online = bool(input("Online(boolean):"))
+
 
 def generate():
     cinema = np.full((n_rows, n_columns), 1)
 
     for i in range(n_rows):
         if((i + 1) % n_rows_break) == 0:
-            for j in range(n_columns):        
-                cinema[i,j] = 0
+            for j in range(n_columns):
+                cinema[i, j] = 0
 
-    for i in range (n_columns):
+    for i in range(n_columns):
         if((i + 1) % n_columns_break) == 0:
-            for j in range (n_rows):
-                cinema[j,i] = 0
+            for j in range(n_rows):
+                cinema[j, i] = 0
 
     for i in range(n_rows):
         for j in range(n_columns):
-            if cinema[i,j] == 1:
+            if cinema[i, j] == 1:
                 temp = random.random()
                 if(temp < perc_empty):
-                    cinema[i,j] = 0
+                    cinema[i, j] = 0
     return cinema
+
 
 def pretty_print(cinema):
     res = ""
     for i in range(len(cinema)):
         for j in range(len(cinema[i])):
-            res += str(cinema[i,j])
+            res += str(cinema[i, j])
         res += "\n"
     return res
+
 
 def write_to_file(cinema, group_sizes):
     pretty_cinema = pretty_print(cinema)
@@ -58,20 +61,21 @@ def write_to_file(cinema, group_sizes):
     f.write(pretty_cinema)
 
     for group in group_sizes:
-          f.write(str(group) + " ")
-  
+        f.write(str(group) + " ")
+
 
 def count_seats(cinema):
     n_of_people = 0
     for i in range(len(cinema)):
         for j in range(len(cinema[i])):
-            if (cinema[i,j] == 1):
+            if (cinema[i, j] == 1):
                 n_of_people += 1
     return n_of_people
 
+
 def generate_groups_offline(cinema):
     group_sizes = np.full(8, 0)
-    n_of_people = 0;
+    n_of_people = 0
     n_of_seats = perc_seats_occupied * count_seats(cinema)
 
     while(n_of_people < n_of_seats):
@@ -104,11 +108,11 @@ def generate_groups_offline(cinema):
 
     return group_sizes
 
+
 def generate_groups_online(cinema):
     group_sizes = np.full(0, int)
-    n_of_people = 0;
+    n_of_people = 0
     n_of_seats = perc_seats_occupied * count_seats(cinema)
-
 
     while(n_of_people < n_of_seats):
         rand = random.random()
@@ -141,8 +145,10 @@ def generate_groups_online(cinema):
     group_sizes = np.append(group_sizes, 0)
     return group_sizes
 
+
 cinema = generate()
-groups = generate_groups_online(cinema) if online else generate_groups_offline(cinema)
+groups = generate_groups_online(
+    cinema) if online else generate_groups_offline(cinema)
 write_to_file(cinema, groups)
 
 print("Done")
