@@ -160,13 +160,16 @@ class TestCheckLegal(unittest.TestCase):
             check_legal(2, 2, x1=0, x2=3, y1=0, y2=0), False, "Group 1 to left"
         )
         self.assertEqual(
-            check_legal(2, 2, x1=3, x2=0, y1=0, y2=0), False, "Group 1 to right"
+            check_legal(2, 2, x1=3, x2=0, y1=0,
+                        y2=0), False, "Group 1 to right"
         )
         self.assertEqual(
-            check_legal(1, 1, x1=0, x2=2, y1=0, y2=0), False, "Group 1 to right"
+            check_legal(1, 1, x1=0, x2=2, y1=0,
+                        y2=0), False, "Group 1 to right"
         )
         self.assertEqual(
-            check_legal(1, 1, x1=0, x2=1, y1=0, y2=0), False, "Group 1 to right"
+            check_legal(1, 1, x1=0, x2=1, y1=0,
+                        y2=0), False, "Group 1 to right"
         )
         self.assertEqual(check_legal(2, 1, x1=0, x2=3, y1=0, y2=0), False)
         self.assertEqual(check_legal(2, 1, x1=0, x2=4, y1=0, y2=0), True)
@@ -178,7 +181,8 @@ class TestCheckLegal(unittest.TestCase):
         self.assertEqual(check_legal(1, 2, x1=0, x2=2, y1=0, y2=0), False)
 
     def test_diagonal(self):
-        self.assertEqual(check_legal(1, 1, x1=0, x2=1, y1=0, y2=1), False, "Diagonal")
+        self.assertEqual(check_legal(1, 1, x1=0, x2=1,
+                                     y1=0, y2=1), False, "Diagonal")
         self.assertEqual(check_legal(5, 5, x1=0, x2=2, y1=2, y2=0), True)
         self.assertEqual(check_legal(1, 1, x1=0, x2=1, y1=0, y2=1), False)
         self.assertEqual(check_legal(1, 1, x1=0, x2=2, y1=0, y2=1), True)

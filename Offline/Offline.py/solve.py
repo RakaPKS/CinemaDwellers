@@ -13,7 +13,8 @@ if __name__ == "__main__":
         default="instances/instance.txt",
         help="Filename with offline instance",
     )
-    parser.add_argument("--search", type=str, default="n", help="Apply search? [y|n]")
+    parser.add_argument("--search", type=str, default="n",
+                        help="Apply search? [y|n]")
     args = parser.parse_args()
 
     a = Seating(*read_instance(args.filename))
