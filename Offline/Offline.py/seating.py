@@ -105,7 +105,7 @@ class Seating:
 
                         # Add hypothetical update to the stack/queue
                         new_seated = current.seated.copy()
-                        new_seated[x, y : y + current_group_size] = (
+                        new_seated[x, y: y + current_group_size] = (
                             np.zeros(current_group_size) + 2
                         )
                         seated_amount = np.count_nonzero(new_seated == 2)
@@ -159,7 +159,8 @@ class Seating:
             for _ in range(0, self.people[group_size - 1]):
 
                 # Get possible legal start positions for the group
-                pos = self.find_legal_start_position(group_size, self.available_seats)
+                pos = self.find_legal_start_position(
+                    group_size, self.available_seats)
                 # print(pos)
                 # If there is at least one place these guys can sit
                 if len(pos) > 0:
@@ -191,7 +192,7 @@ class Seating:
                     )
 
                     # Update where people are sitting
-                    seats[x, y : y + group_size] = np.zeros(group_size) + 2
+                    seats[x, y: y + group_size] = np.zeros(group_size) + 2
                 # No places this group can sit, time to move on.
                 else:
                     no_seat += group_size
@@ -229,8 +230,8 @@ class Seating:
         """
         available_seats = a_s.copy()
         x, y = pos
-        available_seats[x, y - 2 : y + n + 2] = np.zeros(n + 4)
-        available_seats[x + 1, y - 1 : y + n + 1] = np.zeros(n + 2)
-        available_seats[x - 1, y - 1 : y + n + 1] = np.zeros(n + 2)
+        available_seats[x, y - 2: y + n + 2] = np.zeros(n + 4)
+        available_seats[x + 1, y - 1: y + n + 1] = np.zeros(n + 2)
+        available_seats[x - 1, y - 1: y + n + 1] = np.zeros(n + 2)
 
         return available_seats, np.size(a_s) - np.count_nonzero(available_seats)

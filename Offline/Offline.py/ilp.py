@@ -23,6 +23,7 @@ from utils import (
     filter_people,
 )
 
+
 def make_and_solve_ILP(filename, optimized=False, configFile=""):
     """
     Encodes and solves ILP
@@ -55,20 +56,21 @@ def make_and_solve_ILP(filename, optimized=False, configFile=""):
         if amt > 0:
             legals[size + 1] = find_legal_start_positions(size + 1, cinema)
 
-    # Collect group sizes 
+    # Collect group sizes
     size_to_group = defaultdict(list)
-    for i, group_size in enumerate(group_sizes): 
+    for i, group_size in enumerate(group_sizes):
         size_to_group[group_size].append(i)
-    #sys.exit(0)
+    # sys.exit(0)
     print(size_to_group)
     # Instantiate a gurobi ILP model
     model = gp.Model()
 
     if not configFile == "":
-          model.read(configFile)
+        model.read(configFile)
 
     # Each group has a binary variable per possible seat
-    seated = model.addVars(xs, ys, group_amount, vtype=GRB.BINARY, name="seated")
+    seated = model.addVars(xs, ys, group_amount,
+                           vtype=GRB.BINARY, name="seated")
 
     # Every group has a constant size
     size = model.addVars(
@@ -82,7 +84,8 @@ def make_and_solve_ILP(filename, optimized=False, configFile=""):
     # Only one position per group
     for g in range(group_amount):
         model.addConstr(
-            gp.quicksum([seated[x, y, g] for x in range(xs) for y in range(ys)]),
+            gp.quicksum([seated[x, y, g] for x in range(xs)
+                         for y in range(ys)]),
             GRB.LESS_EQUAL,
             1,
         )
@@ -103,25 +106,25 @@ def make_and_solve_ILP(filename, optimized=False, configFile=""):
                 if any_zeros:
                     model.addConstr(seated[x, y, g], GRB.EQUAL, 0)
 
-   
-    
     if optimized:
-        for size1 in tqdm(range(1,max_group_size+1)):
-            for size2 in range(1,max_group_size+1):
+        for size1 in tqdm(range(1, max_group_size+1)):
+            for size2 in range(1, max_group_size+1):
                     # Look for all illegal combinations
                     # Start with every possible position where g1 can be seated using the legals dictionary
-                    for (y1, x1) in legals[size1]:
+                for (y1, x1) in legals[size1]:
                         # Calculate illegal seats for g2 given this start position
-                        invalid_seats = get_invalid_seats(x1, y1, size1, size2, xs, ys)
-                        # Add a constraint, only one group can be seated in this area (<= 1)
-                        for (x2, y2) in invalid_seats:
-                            # For every combination of groups with these specific sizes
-                            for g1 in size_to_group[size1]:
-                                for g2 in size_to_group[size2]:
-                                    if  g1 != g2:
-                                        model.addConstr(
-                                            seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1,
-                                        )
+                    invalid_seats = get_invalid_seats(
+                        x1, y1, size1, size2, xs, ys)
+                    # Add a constraint, only one group can be seated in this area (<= 1)
+                    for (x2, y2) in invalid_seats:
+                        # For every combination of groups with these specific sizes
+                        for g1 in size_to_group[size1]:
+                            for g2 in size_to_group[size2]:
+                                if g1 != g2:
+                                    model.addConstr(
+                                        seated[x1, y1, g1] + seated[x2,
+                                                                    y2, g2], GRB.LESS_EQUAL, 1,
+                                    )
     else:
         # For every combination of groups g1, g2
         for g1 in tqdm(range(group_amount)):
@@ -131,16 +134,18 @@ def make_and_solve_ILP(filename, optimized=False, configFile=""):
                     size2 = group_sizes[g2]
                     for (y1, x1) in legals[size1]:
                         # Calculate illegal seats for g2 given this start position
-                        invalid_seats = get_invalid_seats(x1, y1, size1, size2, xs, ys)
+                        invalid_seats = get_invalid_seats(
+                            x1, y1, size1, size2, xs, ys)
                         # Add a constraint, only one group can be seated in this area (<= 1)
                         for (x2, y2) in invalid_seats:
                             model.addConstr(
-                                seated[x1, y1, g1] + seated[x2, y2, g2], GRB.LESS_EQUAL, 1,
+                                seated[x1, y1, g1] + seated[x2,
+                                                            y2, g2], GRB.LESS_EQUAL, 1,
                             )
                         del invalid_seats
 
     # TODO: Add more constraints that will help fastness of solver
-    
+
     # Maximize number of people seated = seated_g * group_size_g
     # TODO: Set objective maximum manually to help gurobi.
     model.setObjective(
@@ -173,28 +178,32 @@ def make_and_solve_ILP(filename, optimized=False, configFile=""):
         for y in range(ys):
             for g in range(group_amount):
                 if seated[x, y, g].x > 0:
-                    solution[y, x : x + group_sizes[g]] = np.zeros(group_sizes[g]) + 2
+                    solution[y, x: x + group_sizes[g]
+                             ] = np.zeros(group_sizes[g]) + 2
 
     print(cinema)
     print("--- Was solved in %s seconds ---" % (time.time() - start))
     print(solution)
-    print("Not seated", people_amount - count_seated(solution), "out of", people_amount)
+    print("Not seated", people_amount -
+          count_seated(solution), "out of", people_amount)
 
     valid = verify_cinema(solution, xs, ys)
 
     return (filename, configFile, constraintTime, optimizeTime, group_amount, people_amount, valid, people_amount - count_seated(solution))
 
+
 def experiment_runner(optimize=False):
     instanceFolder = "./Offline/instances"
     configFolder = "./Offline/configs"
-    fields = ['InstanceFile', 'ConfigFile', 'ConstraintTime', 'OptimizationTime', 'TotalNumberOfGroups', 'TotalNumberOfPeople', 'Valid', 'Seated']  
-    resultsFile = "./Offline/results/python_{}.csv".format(datetime.now().strftime("%d-%m-%Y-%H-%M-%S"))
+    fields = ['InstanceFile', 'ConfigFile', 'ConstraintTime', 'OptimizationTime',
+              'TotalNumberOfGroups', 'TotalNumberOfPeople', 'Valid', 'Seated']
+    resultsFile = "./Offline/results/python_{}.csv".format(
+        datetime.now().strftime("%d-%m-%Y-%H-%M-%S"))
 
-    
-    with open(resultsFile, 'w+', newline='') as csvfile:  
-        # creating a csv writer object  
+    with open(resultsFile, 'w+', newline='') as csvfile:
+        # creating a csv writer object
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(fields)  
+        csvwriter.writerow(fields)
 
     for i in range(1, len(os.listdir(instanceFolder))):
         instanceFile = "{}/Exact{}.txt".format(instanceFolder, i)
@@ -202,13 +211,11 @@ def experiment_runner(optimize=False):
 
         solveResult = make_and_solve_ILP(instanceFile, optimize, configFile)
 
-        with open(resultsFile, 'a+', newline='') as csvfile:  
-        # creating a csv writer object  
+        with open(resultsFile, 'a+', newline='') as csvfile:
+            # creating a csv writer object
             csvwriter = csv.writer(csvfile)
 
             csvwriter.writerow(np.asarray(solveResult))
-
-    
 
 
 if __name__ == "__main__":
