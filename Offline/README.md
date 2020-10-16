@@ -1,6 +1,4 @@
-# CinemaDwellers
-
-# Offline
+# CinemaDwellers : Offline implementations
 
 ## Gurobi
 Before proceeding you first need to install Gurobi: https://www.gurobi.com/documentation/9.0/quickstart_mac/software_installation_guid.html
