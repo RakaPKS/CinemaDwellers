@@ -5,7 +5,7 @@ using System.Threading;
 using System.IO;
 using System.Diagnostics;
 
-namespace newOnline
+namespace Online
 {
     class Program
     {
